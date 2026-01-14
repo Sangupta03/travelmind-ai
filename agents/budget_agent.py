@@ -1,22 +1,26 @@
 from core.llm import call_llm
+from tools.flight_tool import search_flights
+from tools.hotel_tool import search_hotels
 
 class BudgetAgent:
     def create_plan(self, destination, days, constraints):
+        flights = search_flights(destination, days, constraints)
+        hotels = search_hotels(destination, constraints)
+
         prompt = f"""
         You are a Budget Travel Agent.
 
-        Your goal is to minimize cost while respecting user constraints.
+        Available Flights:
+        {flights}
+
+        Available Hotels:
+        {hotels}
 
         Destination: {destination}
         Days: {days}
         Constraints: {constraints}
 
-        Suggest:
-        - Affordable flights
-        - Budget hotels
-        - Low-cost activities
-
-        Output a clear day-wise plan.
+        Create a low-cost travel plan using the given data.
         """
 
         return call_llm(prompt)

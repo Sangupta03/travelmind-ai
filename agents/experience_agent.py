@@ -1,22 +1,22 @@
 from core.llm import call_llm
+from tools.places_tool import search_places
 
 class ExperienceAgent:
     def create_plan(self, destination, days, constraints):
-        prompt = f"""
-        You are an Experience-focused Travel Agent.
+        places = search_places(destination)
 
-        Your goal is to maximize fun, culture, food and sightseeing.
+        prompt = f"""
+        You are an Experience Travel Agent.
+
+        Popular Places:
+        {places}
 
         Destination: {destination}
         Days: {days}
         Constraints: {constraints}
 
-        Suggest:
-        - Famous attractions
-        - Unique experiences
-        - Local food & nightlife
-
-        Output a clear day-wise plan.
+        Create an exciting sightseeing plan.
         """
 
         return call_llm(prompt)
+
