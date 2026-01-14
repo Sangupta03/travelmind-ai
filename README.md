@@ -34,26 +34,23 @@ Agents:
 
 ## 📁 Project Structure
 
+```text
 travelmind-ai/
-│
 ├── agents/
-│ ├── user_agent.py
-│ ├── budget_agent.py
-│ ├── comfort_agent.py
-│ ├── experience_agent.py
-│ ├── negotiator_agent.py
-│ └── manager_agent.py
-│
+│   ├── user_agent.py
+│   ├── budget_agent.py
+│   ├── comfort_agent.py
+│   ├── experience_agent.py
+│   ├── negotiator_agent.py
+│   └── manager_agent.py
 ├── core/
-│ ├── llm.py
-│ └── scoring.py
-│
+│   ├── llm.py
+│   └── scoring.py
 ├── config.py
 ├── main.py
 ├── requirements.txt
 └── .env
-
-
+```
 ---
 
 ## ⚙️ Setup Instructions
@@ -88,8 +85,11 @@ GEMINI_API_KEY=your_api_key_here
 python main.py
 
 Example:
+
 Describe your travel needs: Budget trip, vegetarian, low walking, travelling with parents
+
 Destination: Jaipur
+
 Number of days: 3
 
 ---
