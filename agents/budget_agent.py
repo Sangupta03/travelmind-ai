@@ -11,6 +11,8 @@ class BudgetAgent:
         flights = self.flight_client.search_flights("DEL", destination[:3].upper())
         hotels = self.hotel_client.search_hotels(destination)
 
+        selected_hotel = hotels[0] if hotels else {"name": "City Center Hotel"}
+
         prompt = f"""
         You are a Budget Travel Agent.
 
@@ -20,6 +22,9 @@ class BudgetAgent:
         Real Hotels:
         {hotels}
 
+        Selected Hotel:
+        {selected_hotel}
+
         Destination: {destination}
         Days: {days}
         Constraints: {constraints}
@@ -27,5 +32,11 @@ class BudgetAgent:
         Create a low-cost travel plan using real data.
         """
 
-        return call_llm(prompt)
+        plan = call_llm(prompt)
+
+        return {
+            "plan": plan,
+            "hotel": selected_hotel
+        }
+
 
