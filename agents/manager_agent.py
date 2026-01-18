@@ -4,10 +4,12 @@ from agents.comfort_agent import ComfortAgent
 from agents.experience_agent import ExperienceAgent
 from agents.negotiator_agent import NegotiatorAgent
 
+
 from core.daily_time_engine import DailyTimeEngine
 from core.maps_optimizer import MapsOptimizer
 from core.walking_estimator import WalkingEstimator
 from tools.attractions_tool import AttractionsTool
+from core.transport_engine import TransportEngine
 
 
 from core.constraints import BudgetEngine
@@ -26,7 +28,7 @@ class ManagerAgent:
         self.walking_estimator = WalkingEstimator()
         self.attractions_tool = AttractionsTool()
         self.daily_time_engine = DailyTimeEngine(max_hours_per_day=8)
-
+        self.transport_engine = TransportEngine(walk_max_meters=800, walk_max_minutes=12)
 
         # Hard constraint engines
         self.budget_engine = BudgetEngine(max_budget=70000)
@@ -179,5 +181,30 @@ Walking Estimate (First Leg):
         daily_schedule_text += "\n==================================================\n"
 
         final_plan += daily_schedule_text
+
+        # -----------------------------
+        # CAB vs WALK DECISION ENGINE
+        # -----------------------------
+        print("\n🚶🚕 Deciding walk vs cab for each leg...")
+
+        transport_text = "\n========== TRANSPORT DECISIONS ==========\n"
+
+        for i in range(len(ordered_places) - 1):
+            origin = ordered_places[i]
+            destination_place = ordered_places[i + 1]
+
+            decision = self.transport_engine.decide(origin, destination_place)
+
+            transport_text += (
+                f"\n{origin} → {destination_place}\n"
+                f"Mode: {decision['mode']}\n"
+                f"Distance: {decision['distance']}\n"
+                f"Time: {decision['time']}\n"
+                f"Reason: {decision['reason']}\n"
+            )
+
+        transport_text += "\n========================================\n"
+
+        final_plan += transport_text
 
 
