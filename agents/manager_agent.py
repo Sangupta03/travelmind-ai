@@ -4,6 +4,7 @@ from agents.comfort_agent import ComfortAgent
 from agents.experience_agent import ExperienceAgent
 from agents.negotiator_agent import NegotiatorAgent
 
+from core.daily_time_engine import DailyTimeEngine
 from core.maps_optimizer import MapsOptimizer
 from core.walking_estimator import WalkingEstimator
 from tools.attractions_tool import AttractionsTool
@@ -24,6 +25,8 @@ class ManagerAgent:
         self.maps_optimizer = MapsOptimizer()
         self.walking_estimator = WalkingEstimator()
         self.attractions_tool = AttractionsTool()
+        self.daily_time_engine = DailyTimeEngine(max_hours_per_day=8)
+
 
         # Hard constraint engines
         self.budget_engine = BudgetEngine(max_budget=70000)
@@ -73,7 +76,7 @@ class ManagerAgent:
     #         "estimated_cost": total_cost,
     #         "final_plan": final_plan
     #     }
-    
+
     def build_travel_plan(self, username, user_input, destination, days):
         print("\n🔍 Extracting user constraints with memory...")
         constraints = self.user_agent.extract_constraints(user_input, username)
@@ -148,5 +151,33 @@ Walking Estimate (First Leg):
             "estimated_cost": total_cost,
             "final_plan": final_plan
         }
+
+        # -----------------------------
+        # DAILY TIME BUDGET ENGINE
+        # -----------------------------
+
+        print("\n⏱️ Applying daily time budgeting (8 hrs/day)...")
+
+        daily_plan = self.daily_time_engine.build_daily_plan(
+            start_point=destination,
+            places=ordered_places,
+            visit_minutes=60
+        )
+
+        daily_schedule_text = "\n========== DAILY TIME-OPTIMIZED ITINERARY ==========\n"
+
+        for i, day in enumerate(daily_plan, start=1):
+            daily_schedule_text += f"\nDay {i}:\n"
+            for item in day:
+                daily_schedule_text += (
+                    f"- {item['place']} "
+                    f"(Travel: {item['travel_time']}, "
+                    f"Distance: {item['distance']}, "
+                    f"Visit: {item['visit_time']})\n"
+                )
+
+        daily_schedule_text += "\n==================================================\n"
+
+        final_plan += daily_schedule_text
 
 
