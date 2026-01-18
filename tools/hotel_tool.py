@@ -1,36 +1,29 @@
 import requests
-from tools.amadeus_client import AmadeusClient
+from config import SERPAPI_KEY
 
 class HotelSearch:
-    def __init__(self):
-        self.client = AmadeusClient()
-
-    def search_hotels(self, city_code):
-        url = "https://test.api.amadeus.com/v2/shopping/hotel-offers"
+    def search_hotels(self, city):
+        url = "https://serpapi.com/search.json"
 
         params = {
-            "cityCode": city_code,
-            "radius": 5,
-            "radiusUnit": "KM"
+            "engine": "google_hotels",
+            "q": f"hotels in {city}",
+            "check_in_date": "2026-02-01",
+            "check_out_date": "2026-02-04",
+            "adults": 2,
+            "currency": "INR",
+            "api_key": SERPAPI_KEY
         }
 
-        response = requests.get(
-            url,
-            headers=self.client.get_headers(),
-            params=params,
-            timeout=20
-        )
-
+        response = requests.get(url, params=params, timeout=20)
         data = response.json()
 
         hotels = []
-        for offer in data.get("data", [])[:5]:
-            hotel = offer["hotel"]
+        for h in data.get("properties", [])[:5]:
             hotels.append({
-                "name": hotel["name"],
-                "rating": hotel.get("rating", "N/A"),
-                "city": hotel["cityCode"]
+                "name": h["name"],
+                "rating": h.get("rating"),
+                "price": h.get("rate_per_night", {}).get("lowest")
             })
 
         return hotels
-

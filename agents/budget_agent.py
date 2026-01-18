@@ -1,26 +1,31 @@
 from core.llm import call_llm
-from tools.flight_tool import search_flights
-from tools.hotel_tool import search_hotels
+from tools.flight_tool import FlightSearch
+from tools.hotel_tool import HotelSearch
 
 class BudgetAgent:
+    def __init__(self):
+        self.flight_client = FlightSearch()
+        self.hotel_client = HotelSearch()
+
     def create_plan(self, destination, days, constraints):
-        flights = search_flights(destination, days, constraints)
-        hotels = search_hotels(destination, constraints)
+        flights = self.flight_client.search_flights("DEL", destination[:3].upper())
+        hotels = self.hotel_client.search_hotels(destination)
 
         prompt = f"""
         You are a Budget Travel Agent.
 
-        Available Flights:
+        Real Flights:
         {flights}
 
-        Available Hotels:
+        Real Hotels:
         {hotels}
 
         Destination: {destination}
         Days: {days}
         Constraints: {constraints}
 
-        Create a low-cost travel plan using the given data.
+        Create a low-cost travel plan using real data.
         """
 
         return call_llm(prompt)
+
