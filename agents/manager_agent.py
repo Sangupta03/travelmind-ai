@@ -4,6 +4,7 @@ from agents.comfort_agent import ComfortAgent
 from agents.experience_agent import ExperienceAgent
 from agents.negotiator_agent import NegotiatorAgent
 
+from tools.route_links import RouteLinkGenerator
 
 from core.daily_time_engine import DailyTimeEngine
 from core.maps_optimizer import MapsOptimizer
@@ -29,6 +30,7 @@ class ManagerAgent:
         self.attractions_tool = AttractionsTool()
         self.daily_time_engine = DailyTimeEngine(max_hours_per_day=8)
         self.transport_engine = TransportEngine(walk_max_meters=800, walk_max_minutes=12)
+        self.route_links = RouteLinkGenerator()
 
         # Hard constraint engines
         self.budget_engine = BudgetEngine(max_budget=70000)
@@ -183,11 +185,11 @@ Walking Estimate (First Leg):
         final_plan += daily_schedule_text
 
         # -----------------------------
-        # CAB vs WALK DECISION ENGINE
+        # CAB vs WALK + ROUTE LINKS
         # -----------------------------
-        print("\n🚶🚕 Deciding walk vs cab for each leg...")
+        print("\n🚶🚕 Generating transport routes with Google Maps links...")
 
-        transport_text = "\n========== TRANSPORT DECISIONS ==========\n"
+        transport_text = "\n========== TRANSPORT & NAVIGATION ==========\n"
 
         for i in range(len(ordered_places) - 1):
             origin = ordered_places[i]
@@ -195,16 +197,21 @@ Walking Estimate (First Leg):
 
             decision = self.transport_engine.decide(origin, destination_place)
 
+            mode = "walking" if decision["mode"] == "WALK" else "driving"
+            route_link = self.route_links.generate(origin, destination_place, mode)
+
             transport_text += (
                 f"\n{origin} → {destination_place}\n"
-                f"Mode: {decision['mode']}\n"
+                f"Recommended Mode: {decision['mode']}\n"
                 f"Distance: {decision['distance']}\n"
                 f"Time: {decision['time']}\n"
                 f"Reason: {decision['reason']}\n"
+                f"Google Maps Route: {route_link}\n"
             )
 
-        transport_text += "\n========================================\n"
+        transport_text += "\n===========================================\n"
 
         final_plan += transport_text
+
 
 
