@@ -4,17 +4,104 @@
     <title>Your Travel Plan</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
+
 <body>
-    <h1>Your Personalized Travel Plan</h1>
+<div class="container">
 
+<!-- HEADER -->
+<div class="card">
+    <h1>🌍 Your AI Travel Plan</h1>
     <h3>Estimated Cost: ₹{{ cost }}</h3>
+    <h3>🏨 Hotel: {{ hotel }}</h3>
+</div>
 
-    <h3>Constraints</h3>
-    <pre>{{ constraints }}</pre>
 
-    <h3>Itinerary</h3>
-    <pre>{{ plan }}</pre>
+<!-- CONSTRAINT BADGES -->
+<div class="card">
+    <h2>Your Preferences</h2>
+    {% if constraints is mapping %}
+        {% for k,v in constraints.items() %}
+            <span class="badge">{{k}} : {{v}}</span>
+        {% endfor %}
+    {% else %}
+        <span class="badge">{{ constraints }}</span>
+    {% endif %}
+</div>
 
-    <a href="/">Plan Another Trip</a>
+
+<!-- DAILY ITINERARY -->
+{% for day in daily %}
+<div class="card">
+
+    <h2>📅 Day {{ loop.index }}</h2>
+
+    {% for item in day %}
+    <div class="place-box">
+
+        <h3>{{ item.place }}</h3>
+
+        <p>🚗 Travel Time: {{ item.travel_time }}</p>
+        <p>📏 Distance: {{ item.distance }}</p>
+        <p>⏱ Visit Time: {{ item.visit_time }}</p>
+
+        <div class="map-frame">
+        <iframe
+            width="100%"
+            height="220"
+            loading="lazy"
+            src="https://www.google.com/maps?q={{ item.place | urlencode }}&output=embed">
+        </iframe>
+        </div>
+
+        <br>
+        <a class="button"
+        target="_blank"
+        href="https://www.google.com/maps/search/?api=1&query={{ item.place | urlencode }}">
+        Open in Maps
+        </a>
+
+    </div>
+    {% endfor %}
+
+</div>
+{% endfor %}
+
+
+<!-- TRANSPORT SECTION -->
+<div class="card">
+<h2>🚕 Transport & Routes</h2>
+
+{% for t in transport %}
+<div class="transport-box">
+
+<strong>{{t.from}} → {{t.to}}</strong><br>
+
+Mode: {{t.mode}}<br>
+Distance: {{t.distance}}<br>
+Time: {{t.time}}<br>
+Reason: {{t.reason}}<br>
+
+<br>
+<a class="button" target="_blank" href="{{t.link}}">
+Open Route
+</a>
+
+</div>
+{% endfor %}
+
+</div>
+
+
+<!-- FULL AI REASONING -->
+<div class="card">
+<h2>🤖 AI Reasoning Plan</h2>
+<pre>{{ plan }}</pre>
+</div>
+
+
+<a class="button" href="/">Plan Another Trip</a>
+
+</div>
 </body>
 </html>
+

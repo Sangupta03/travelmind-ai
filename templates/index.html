@@ -4,23 +4,41 @@
     <title>TravelMind AI</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
+
 <body>
-    <h1>TravelMind AI Planner</h1>
+<div class="container">
 
-    <form action="/plan" method="post">
-        <label>Name</label>
-        <input type="text" name="name" required>
+<div class="card">
+    <h1>✈️ TravelMind AI Planner</h1>
+    <p>Multi-Agent Intelligent Travel Planning System</p>
+</div>
 
-        <label>Travel Needs</label>
-        <textarea name="needs" required></textarea>
+<div class="card">
+<form action="/plan" method="post">
 
-        <label>Destination</label>
-        <input type="text" name="destination" required>
+<h2>Create Your Smart Trip</h2>
 
-        <label>Number of Days</label>
-        <input type="number" name="days" required>
+<label>Name</label>
+<input type="text" name="name" required>
 
-        <button type="submit">Create My Trip</button>
-    </form>
+<label>Travel Needs</label>
+<textarea name="needs" required
+placeholder="budget, low walking, vegetarian, with parents..."></textarea>
+
+<label>Destination</label>
+<input type="text" name="destination" required>
+
+<label>Days</label>
+<input type="number" name="days" required>
+
+<br>
+<button class="button" type="submit">
+Generate AI Travel Plan
+</button>
+
+</form>
+</div>
+
+</div>
 </body>
 </html>
