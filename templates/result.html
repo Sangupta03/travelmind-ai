@@ -1,107 +1,371 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Your Travel Plan</title>
-    <link rel="stylesheet" href="/static/style.css">
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TravelMind AI — {{ destination }}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
 </head>
+<body class="app-page result-page">
 
-<body>
-<div class="container">
+  <div class="app-layout">
 
-<!-- HEADER -->
-<div class="card">
-    <h1>🌍 Your AI Travel Plan</h1>
-    <h3>Estimated Cost: ₹{{ cost }}</h3>
-    <h3>🏨 Hotel: {{ hotel }}</h3>
-</div>
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <span class="nav-logo">✦</span>
+        <span class="nav-name">TravelMind</span>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="/dashboard" class="s-link">
+          <span class="s-icon">⊞</span> Home
+        </a>
+        <a href="/create" class="s-link">
+          <span class="s-icon">＋</span> Create Trip
+        </a>
+        <a href="/trips" class="s-link">
+          <span class="s-icon">📂</span> Saved Trips
+        </a>
+        <a href="/profile" class="s-link">
+          <span class="s-icon">◯</span> Profile
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <a href="/logout" class="s-logout">↩ Logout</a>
+      </div>
+    </aside>
 
+    <!-- MAIN RESULT AREA -->
+    <main class="app-main result-main">
 
-<!-- CONSTRAINT BADGES -->
-<div class="card">
-    <h2>Your Preferences</h2>
-    {% if constraints is mapping %}
-        {% for k,v in constraints.items() %}
-            <span class="badge">{{k}} : {{v}}</span>
-        {% endfor %}
-    {% else %}
-        <span class="badge">{{ constraints }}</span>
-    {% endif %}
-</div>
+      <!-- TRIP HEADER -->
+      <div class="trip-header">
+        <div class="trip-header-bg">
+          <div class="orb orb-trip-1"></div>
+          <div class="orb orb-trip-2"></div>
+        </div>
+        <div class="trip-header-content">
+          <div class="trip-crumb"><a href="/dashboard">Home</a> → <a href="/trips">Trips</a> → {{ destination }}</div>
+          <h1 class="trip-title">{{ destination }}</h1>
+          <div class="trip-meta-row">
+            <span class="trip-meta-pill">{{ days_count }} Days</span>
+            <span class="trip-meta-pill">🏨 {{ hotel }}</span>
+            <span class="trip-meta-pill cost-pill">₹{{ cost }}</span>
+          </div>
+        </div>
+      </div>
 
+      <!-- SUMMARY CARDS -->
+      <div class="summary-grid">
+        <div class="sum-card">
+          <div class="sum-icon">📍</div>
+          <div class="sum-body">
+            <div class="sum-value">{{ attractions | length }}</div>
+            <div class="sum-label">Attractions</div>
+          </div>
+        </div>
+        <div class="sum-card">
+          <div class="sum-icon">📅</div>
+          <div class="sum-body">
+            <div class="sum-value">{{ days_count }}</div>
+            <div class="sum-label">Days Planned</div>
+          </div>
+        </div>
+        <div class="sum-card">
+          <div class="sum-icon">💰</div>
+          <div class="sum-body">
+            <div class="sum-value">₹{{ cost }}</div>
+            <div class="sum-label">Total Budget</div>
+          </div>
+        </div>
+        <div class="sum-card">
+          <div class="sum-icon">🛏</div>
+          <div class="sum-body">
+            <div class="sum-value truncate">{{ hotel }}</div>
+            <div class="sum-label">Hotel</div>
+          </div>
+        </div>
+        <div class="sum-card">
+          <div class="sum-icon">🚕</div>
+          <div class="sum-body">
+            <div class="sum-value">{{ transport | length }}</div>
+            <div class="sum-label">Route Legs</div>
+          </div>
+        </div>
+      </div>
 
-<!-- DAILY ITINERARY -->
-{% for day in daily %}
-<div class="card">
-
-    <h2>📅 Day {{ loop.index }}</h2>
-
-    {% for item in day %}
-    <div class="place-box">
-
-        <h3>{{ item.place }}</h3>
-
-        <p>🚗 Travel Time: {{ item.travel_time }}</p>
-        <p>📏 Distance: {{ item.distance }}</p>
-        <p>⏱ Visit Time: {{ item.visit_time }}</p>
-
-        <div class="map-frame">
-        <iframe
-            width="100%"
-            height="220"
-            loading="lazy"
-            src="https://www.google.com/maps?q={{ item.place | urlencode }}&output=embed">
-        </iframe>
+      <!-- TABS -->
+      <div class="tabs-container">
+        <div class="tabs-nav">
+          <button class="tab-btn active" onclick="switchTab('overview')">Overview</button>
+          <button class="tab-btn" onclick="switchTab('itinerary')">Itinerary</button>
+          <button class="tab-btn" onclick="switchTab('transport')">Transport</button>
+          <button class="tab-btn" onclick="switchTab('budget')">Budget</button>
+          <button class="tab-btn" onclick="switchTab('insights')">AI Insights</button>
         </div>
 
-        <br>
-        <a class="button"
-        target="_blank"
-        href="https://www.google.com/maps/search/?api=1&query={{ item.place | urlencode }}">
-        Open in Maps
-        </a>
+        <!-- OVERVIEW TAB -->
+        <div class="tab-panel active" id="tab-overview">
+          <div class="overview-grid">
+            <div class="ov-card">
+              <h3>Trip Summary</h3>
+              <div class="ov-row"><span>Destination</span><strong>{{ destination }}</strong></div>
+              <div class="ov-row"><span>Hotel</span><strong>{{ hotel }}</strong></div>
+              <div class="ov-row"><span>Duration</span><strong>{{ days_count }} Days</strong></div>
+              <div class="ov-row"><span>Total Cost</span><strong>₹{{ cost }}</strong></div>
+              <div class="ov-row"><span>Attractions</span><strong>{{ attractions | length }} Places</strong></div>
+            </div>
 
-    </div>
-    {% endfor %}
+            <div class="ov-card">
+              <h3>Your Constraints</h3>
+              {% if constraints %}
+                {% if constraints is mapping %}
+                  {% for key, val in constraints.items() %}
+                    <div class="ov-row"><span>{{ key | replace('_', ' ') | title }}</span><strong>{{ val }}</strong></div>
+                  {% endfor %}
+                {% else %}
+                  <p class="ov-text">{{ constraints }}</p>
+                {% endif %}
+              {% else %}
+                <p class="ov-text">No specific constraints applied.</p>
+              {% endif %}
+            </div>
 
-</div>
-{% endfor %}
+            <div class="ov-card ov-card-wide">
+              <h3>All Attractions</h3>
+              <div class="attractions-list">
+                {% for place in attractions %}
+                <div class="attraction-chip">
+                  <span class="att-num">{{ loop.index }}</span>
+                  {{ place }}
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </div>
 
+        <!-- ITINERARY TAB -->
+        <div class="tab-panel" id="tab-itinerary">
+          {% if daily_plan %}
+            {% for day in daily_plan %}
+            <div class="day-block">
+              <div class="day-header">
+                <span class="day-badge">Day {{ loop.index }}</span>
+                <span class="day-count">{{ day | length }} places</span>
+              </div>
+              <div class="day-places">
+                {% for item in day %}
+                <div class="place-card">
+                  <div class="place-icon">📍</div>
+                  <div class="place-body">
+                    <div class="place-name">{{ item.place }}</div>
+                    <div class="place-meta">
+                      <span>🚗 {{ item.travel_time }}</span>
+                      <span>📏 {{ item.distance }}</span>
+                      <span>⏱ {{ item.visit_time }}</span>
+                    </div>
+                  </div>
+                  <a href="https://www.google.com/maps/search/?api=1&query={{ item.place | urlencode }}" target="_blank" class="place-maps-btn">Maps ↗</a>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+            {% endfor %}
+          {% else %}
+            <div class="empty-state"><p>Daily plan not available.</p></div>
+          {% endif %}
+        </div>
 
-<!-- TRANSPORT SECTION -->
-<div class="card">
-<h2>🚕 Transport & Routes</h2>
+        <!-- TRANSPORT TAB -->
+        <div class="tab-panel" id="tab-transport">
+          {% if transport %}
+            {% for leg in transport %}
+            <div class="transport-card">
+              <div class="transport-route">
+                <span class="t-from">{{ leg.from }}</span>
+                <div class="t-arrow-wrap">
+                  <span class="t-mode-badge {% if leg.mode == 'WALK' %}walk{% else %}cab{% endif %}">
+                    {% if leg.mode == 'WALK' %}🚶 WALK{% else %}🚕 CAB{% endif %}
+                  </span>
+                  <div class="t-line"></div>
+                </div>
+                <span class="t-to">{{ leg.to }}</span>
+              </div>
+              <div class="transport-meta">
+                {% if leg.distance %}<span>📏 {{ leg.distance }}</span>{% endif %}
+                {% if leg.time %}<span>⏱ {{ leg.time }}</span>{% endif %}
+              </div>
+              {% if leg.reason %}
+              <div class="transport-reason">💡 {{ leg.reason }}</div>
+              {% endif %}
+              {% if leg.link %}
+              <a href="{{ leg.link }}" target="_blank" class="transport-link">Open in Google Maps ↗</a>
+              {% endif %}
+            </div>
+            {% endfor %}
+          {% else %}
+            <div class="empty-state"><p>Transport data not available.</p></div>
+          {% endif %}
+        </div>
 
-{% for t in transport %}
-<div class="transport-box">
+        <!-- BUDGET TAB -->
+        <div class="tab-panel" id="tab-budget">
+          <div class="budget-container">
+            <div class="budget-breakdown">
+              <h3>Cost Breakdown</h3>
+              {% if cost_breakdown %}
+                {% for category, amount in cost_breakdown.items() %}
+                <div class="budget-row">
+                  <div class="budget-category">
+                    <span class="budget-icon">
+                      {% if category == 'flight' %}✈{% elif category == 'hotel' %}🏨{% elif category == 'local_transport' %}🚕{% elif category == 'food' %}🍽{% else %}💳{% endif %}
+                    </span>
+                    {{ category | replace('_', ' ') | title }}
+                  </div>
+                  <div class="budget-bar-wrap">
+                    <div class="budget-bar-fill" style="width: {{ (amount / cost * 100) | round }}%"></div>
+                  </div>
+                  <div class="budget-amount">₹{{ amount }}</div>
+                </div>
+                {% endfor %}
+              {% endif %}
+              <div class="budget-total">
+                <span>Total</span>
+                <span class="budget-total-val">₹{{ cost }}</span>
+              </div>
+            </div>
 
-<strong>{{t.from}} → {{t.to}}</strong><br>
+            <div class="budget-donut-wrap">
+              <canvas id="budgetChart" width="220" height="220"></canvas>
+              <div class="budget-chart-center">
+                <div class="budget-chart-total">₹{{ cost }}</div>
+                <div class="budget-chart-label">Total</div>
+              </div>
+            </div>
+          </div>
+        </div>
 
-Mode: {{t.mode}}<br>
-Distance: {{t.distance}}<br>
-Time: {{t.time}}<br>
-Reason: {{t.reason}}<br>
+        <!-- AI INSIGHTS TAB -->
+        <div class="tab-panel" id="tab-insights">
+          <div class="insights-hero">
+            <div class="insights-badge">🧠 AI Reasoning</div>
+            <h2>What the Agents Decided</h2>
+          </div>
+          <div class="insights-grid">
+            <div class="insight-card">
+              <span class="insight-check">✔</span>
+              <div>
+                <strong>Route Optimized</strong>
+                <p>MapsOptimizer applied nearest-neighbor ordering to minimize total travel time.</p>
+              </div>
+            </div>
+            <div class="insight-card">
+              <span class="insight-check">✔</span>
+              <div>
+                <strong>Central Hotel Selected</strong>
+                <p>BudgetAgent chose a hotel minimizing cab costs while staying within budget.</p>
+              </div>
+            </div>
+            <div class="insight-card">
+              <span class="insight-check">✔</span>
+              <div>
+                <strong>Daily Load Balanced</strong>
+                <p>DailyTimeEngine capped each day at 8 hours of activity for sustainable pacing.</p>
+              </div>
+            </div>
+            <div class="insight-card">
+              <span class="insight-check">✔</span>
+              <div>
+                <strong>Walking Minimized</strong>
+                <p>TransportEngine auto-detected legs over 800m and switched to cab recommendation.</p>
+              </div>
+            </div>
+            <div class="insight-card">
+              <span class="insight-check">✔</span>
+              <div>
+                <strong>Constraints Applied</strong>
+                <p>ConstraintValidator checked every plan against your preferences before final output.</p>
+              </div>
+            </div>
+            <div class="insight-card">
+              <span class="insight-check">✔</span>
+              <div>
+                <strong>Agent Negotiation Complete</strong>
+                <p>NegotiatorAgent merged Budget, Comfort, and Experience plans into optimal itinerary.</p>
+              </div>
+            </div>
+          </div>
 
-<br>
-<a class="button" target="_blank" href="{{t.link}}">
-Open Route
-</a>
+          <div class="reasoning-toggle">
+            <button class="btn-ghost" onclick="toggleReasoning(this)">Show Full AI Reasoning ↓</button>
+            <div class="reasoning-raw" id="reasoningRaw" style="display:none">
+              <pre>{{ ai_reasoning }}</pre>
+            </div>
+          </div>
+        </div>
 
-</div>
-{% endfor %}
+      </div><!-- /tabs-container -->
 
-</div>
+    </main>
+  </div>
 
+  <script>
+    // Tab switching
+    function switchTab(name) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      event.target.classList.add('active');
+      document.getElementById('tab-' + name).classList.add('active');
+    }
 
-<!-- FULL AI REASONING -->
-<div class="card">
-<h2>🤖 AI Reasoning Plan</h2>
-<pre>{{ plan }}</pre>
-</div>
+    // Toggle reasoning
+    function toggleReasoning(btn) {
+      const raw = document.getElementById('reasoningRaw');
+      if (raw.style.display === 'none') {
+        raw.style.display = 'block';
+        btn.textContent = 'Hide Full AI Reasoning ↑';
+      } else {
+        raw.style.display = 'none';
+        btn.textContent = 'Show Full AI Reasoning ↓';
+      }
+    }
 
+    // Budget donut chart
+    document.addEventListener('DOMContentLoaded', () => {
+      const canvas = document.getElementById('budgetChart');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
 
-<a class="button" href="/">Plan Another Trip</a>
+      const breakdown = {{ cost_breakdown | tojson }};
+      const labels = Object.keys(breakdown).map(k => k.replace('_', ' '));
+      const values = Object.values(breakdown);
+      const colors = ['#f59e0b', '#10b981', '#6366f1', '#f43f5e', '#14b8a6'];
 
-</div>
+      const total = values.reduce((a,b) => a+b, 0);
+      let startAngle = -Math.PI / 2;
+      const cx = 110, cy = 110, r = 90, ir = 55;
+
+      values.forEach((val, i) => {
+        const slice = (val / total) * 2 * Math.PI;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.arc(cx, cy, r, startAngle, startAngle + slice);
+        ctx.closePath();
+        ctx.fillStyle = colors[i % colors.length];
+        ctx.fill();
+
+        // inner hole
+        ctx.beginPath();
+        ctx.arc(cx, cy, ir, 0, 2 * Math.PI);
+        ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--bg') || '#0d0d14';
+        ctx.fill();
+
+        startAngle += slice;
+      });
+    });
+  </script>
 </body>
 </html>
-

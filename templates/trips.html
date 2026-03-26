@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TravelMind AI — Saved Trips</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="app-page">
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <span class="nav-logo">✦</span>
+        <span class="nav-name">TravelMind</span>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="/dashboard" class="s-link"><span class="s-icon">⊞</span> Home</a>
+        <a href="/create" class="s-link"><span class="s-icon">＋</span> Create Trip</a>
+        <a href="/trips" class="s-link active"><span class="s-icon">📂</span> Saved Trips</a>
+        <a href="/profile" class="s-link"><span class="s-icon">◯</span> Profile</a>
+      </nav>
+      <div class="sidebar-footer">
+        <a href="/logout" class="s-logout">↩ Logout</a>
+      </div>
+    </aside>
+    <main class="app-main">
+      <div class="app-topbar">
+        <div>
+          <h1 class="app-heading">Saved Trips</h1>
+          <p class="app-subheading">All your AI-planned itineraries</p>
+        </div>
+        <a href="/create" class="btn-primary">＋ New Trip</a>
+      </div>
+      <div class="trips-grid trips-grid-big">
+        {% if trips %}
+          {% for trip in trips %}
+          <a href="/result/{{ trip.id }}" class="trip-card trip-card-big">
+            <div class="tcb-header">
+              <div class="tcb-dest">{{ trip.destination }}</div>
+              <span class="tcb-days">{{ trip.days }} days</span>
+            </div>
+            <div class="tcb-hotel">🏨 {{ trip.hotel }}</div>
+            <div class="tcb-cost">₹{{ trip.cost }}</div>
+            <div class="tcb-footer">
+              <span>{{ trip.date }}</span>
+              <span class="tcb-arrow">View Trip →</span>
+            </div>
+          </a>
+          {% endfor %}
+        {% else %}
+          <div class="empty-state" style="grid-column:1/-1">
+            <div class="empty-icon">✈</div>
+            <p>No saved trips yet.</p>
+            <a href="/create" class="btn-primary" style="margin-top:1rem">Plan Your First Trip</a>
+          </div>
+        {% endif %}
+      </div>
+    </main>
+  </div>
+</body>
+</html>

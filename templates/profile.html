@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TravelMind AI — Profile</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="app-page">
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <span class="nav-logo">✦</span>
+        <span class="nav-name">TravelMind</span>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="/dashboard" class="s-link"><span class="s-icon">⊞</span> Home</a>
+        <a href="/create" class="s-link"><span class="s-icon">＋</span> Create Trip</a>
+        <a href="/trips" class="s-link"><span class="s-icon">📂</span> Saved Trips</a>
+        <a href="/profile" class="s-link active"><span class="s-icon">◯</span> Profile</a>
+      </nav>
+      <div class="sidebar-footer">
+        <a href="/logout" class="s-logout">↩ Logout</a>
+      </div>
+    </aside>
+    <main class="app-main">
+      <h1 class="app-heading">Profile</h1>
+      <p class="app-subheading" style="margin-bottom:2rem">Your account &amp; preferences</p>
+      <div style="max-width:420px">
+        <div class="ov-card">
+          <h3>Account</h3>
+          <div class="ov-row"><span>Name</span><strong>{{ username }}</strong></div>
+          <div class="ov-row"><span>Memory</span><strong>Active</strong></div>
+          <div class="ov-row"><span>AI Model</span><strong>Gemini 2.5 Flash</strong></div>
+        </div>
+        <div style="margin-top:1.5rem">
+          <a href="/logout" class="btn-ghost" style="color:#f43f5e;border-color:rgba(244,63,94,0.3)">↩ Logout</a>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

@@ -3,7 +3,7 @@ from google.genai import Client
 from config import GEMINI_API_KEY
 
 client = Client(api_key=GEMINI_API_KEY)
-MODEL_NAME = "gemini-2.5-flash"
+MODEL_NAME = "gemini-2.5-flash-lite"
 
 def call_llm(prompt: str, retries=3):
     for attempt in range(retries):

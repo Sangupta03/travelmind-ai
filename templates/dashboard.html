@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TravelMind AI — Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="app-page">
+
+  <div class="app-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <span class="nav-logo">✦</span>
+        <span class="nav-name">TravelMind</span>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="/dashboard" class="s-link active">
+          <span class="s-icon">⊞</span> Home
+        </a>
+        <a href="/create" class="s-link">
+          <span class="s-icon">＋</span> Create Trip
+        </a>
+        <a href="/trips" class="s-link">
+          <span class="s-icon">📂</span> Saved Trips
+        </a>
+        <a href="/profile" class="s-link">
+          <span class="s-icon">◯</span> Profile
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <a href="/logout" class="s-logout">↩ Logout</a>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="app-main">
+
+      <div class="app-topbar">
+        <div>
+          <h1 class="app-heading">Good afternoon, {{ username }} 👋</h1>
+          <p class="app-subheading">Where are we going next?</p>
+        </div>
+        <a href="/create" class="btn-primary">＋ New Trip</a>
+      </div>
+
+      <!-- QUICK CREATE CARD -->
+      <div class="dash-hero-card">
+        <div class="dhc-bg">
+          <div class="orb orb-dash-1"></div>
+          <div class="orb orb-dash-2"></div>
+        </div>
+        <div class="dhc-content">
+          <div class="dhc-badge">AI-Powered</div>
+          <h2>Plan Your Next Adventure</h2>
+          <p>Tell our agent team your needs and get a fully optimized itinerary in seconds.</p>
+          <a href="/create" class="btn-primary">Start Planning →</a>
+        </div>
+        <div class="dhc-visual">✈</div>
+      </div>
+
+      <!-- RECENT TRIPS -->
+      <div class="section-row">
+        <h2 class="section-mini-title">Recent Trips</h2>
+        <a href="/trips" class="see-all">See all →</a>
+      </div>
+
+      <div class="trips-grid">
+        {% if recent_trips %}
+          {% for trip in recent_trips %}
+          <a href="/result/{{ trip.id }}" class="trip-card">
+            <div class="trip-card-dest">{{ trip.destination }}</div>
+            <div class="trip-card-meta">{{ trip.days }} days · ₹{{ trip.cost }}</div>
+            <div class="trip-card-arrow">→</div>
+          </a>
+          {% endfor %}
+        {% else %}
+          <div class="empty-state">
+            <div class="empty-icon">🌍</div>
+            <p>No trips yet. Create your first one!</p>
+            <a href="/create" class="btn-primary" style="margin-top:1rem;">Plan a Trip</a>
+          </div>
+        {% endif %}
+      </div>
+
+    </main>
+  </div>
+
+</body>
+</html>

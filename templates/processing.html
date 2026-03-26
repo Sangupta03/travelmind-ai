@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TravelMind AI — Generating Your Plan</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="processing-page">
+
+  <div class="processing-bg">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="grid-overlay"></div>
+  </div>
+
+  <div class="processing-content">
+
+    <div class="proc-brand">
+      <span class="nav-logo">✦</span>
+      <span class="nav-name">TravelMind</span>
+      <span class="nav-tag">AI</span>
+    </div>
+
+    <div class="proc-title">
+      <div class="proc-pulse">🧠</div>
+      <h1>AI Planning Your Trip...</h1>
+      <p class="proc-dest" id="procDest">Destination</p>
+    </div>
+
+    <div class="proc-steps">
+      <div class="proc-step" id="step-0">
+        <div class="proc-step-icon">👤</div>
+        <div class="proc-step-text">
+          <span class="proc-step-label">UserAgent</span>
+          <span class="proc-step-desc">Extracting your travel constraints</span>
+        </div>
+        <div class="proc-step-status">
+          <div class="proc-spinner"></div>
+        </div>
+      </div>
+      <div class="proc-step" id="step-1">
+        <div class="proc-step-icon">💰</div>
+        <div class="proc-step-text">
+          <span class="proc-step-label">BudgetAgent</span>
+          <span class="proc-step-desc">Searching flights &amp; hotels</span>
+        </div>
+        <div class="proc-step-status">
+          <div class="proc-spinner"></div>
+        </div>
+      </div>
+      <div class="proc-step" id="step-2">
+        <div class="proc-step-icon">🛋</div>
+        <div class="proc-step-text">
+          <span class="proc-step-label">ComfortAgent</span>
+          <span class="proc-step-desc">Selecting comfortable hotel &amp; routes</span>
+        </div>
+        <div class="proc-step-status">
+          <div class="proc-spinner"></div>
+        </div>
+      </div>
+      <div class="proc-step" id="step-3">
+        <div class="proc-step-icon">🎉</div>
+        <div class="proc-step-text">
+          <span class="proc-step-label">ExperienceAgent</span>
+          <span class="proc-step-desc">Finding top attractions</span>
+        </div>
+        <div class="proc-step-status">
+          <div class="proc-spinner"></div>
+        </div>
+      </div>
+      <div class="proc-step" id="step-4">
+        <div class="proc-step-icon">🤝</div>
+        <div class="proc-step-text">
+          <span class="proc-step-label">NegotiatorAgent</span>
+          <span class="proc-step-desc">Merging &amp; optimizing all plans</span>
+        </div>
+        <div class="proc-step-status">
+          <div class="proc-spinner"></div>
+        </div>
+      </div>
+      <div class="proc-step" id="step-5">
+        <div class="proc-step-icon">🗺</div>
+        <div class="proc-step-text">
+          <span class="proc-step-label">MapsOptimizer</span>
+          <span class="proc-step-desc">Calculating optimal route order</span>
+        </div>
+        <div class="proc-step-status">
+          <div class="proc-spinner"></div>
+        </div>
+      </div>
+      <div class="proc-step" id="step-6">
+        <div class="proc-step-icon">🚕</div>
+        <div class="proc-step-text">
+          <span class="proc-step-label">TransportEngine</span>
+          <span class="proc-step-desc">Deciding walk vs cab for each leg</span>
+        </div>
+        <div class="proc-step-status">
+          <div class="proc-spinner"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="proc-bar-wrap">
+      <div class="proc-bar" id="procBar"></div>
+    </div>
+    <p class="proc-hint">This takes 30–60 seconds. AI agents are reasoning in parallel.</p>
+
+  </div>
+
+  <script>
+    // Show destination
+    const dest = sessionStorage.getItem('tripDest') || 'Your Destination';
+    document.getElementById('procDest').textContent = dest;
+
+    // Animate steps sequentially (UI only — real processing happens server-side)
+    const steps = document.querySelectorAll('.proc-step');
+    const totalSteps = steps.length;
+    let current = 0;
+
+    function activateStep(i) {
+      if (i > 0) {
+        steps[i-1].classList.remove('active');
+        steps[i-1].classList.add('done');
+        steps[i-1].querySelector('.proc-step-status').innerHTML = '<span class="proc-check">✓</span>';
+      }
+      if (i < totalSteps) {
+        steps[i].classList.add('active');
+        const pct = Math.round(((i+1)/totalSteps)*100);
+        document.getElementById('procBar').style.width = pct + '%';
+      }
+    }
+
+    // Stagger activations — simulate agent pipeline timing
+    const delays = [0, 4000, 8000, 12000, 18000, 24000, 30000];
+    delays.forEach((d, i) => {
+      setTimeout(() => activateStep(i), d);
+    });
+
+    // Complete all at the end
+    setTimeout(() => {
+      steps.forEach(s => {
+        s.classList.remove('active');
+        s.classList.add('done');
+        s.querySelector('.proc-step-status').innerHTML = '<span class="proc-check">✓</span>';
+      });
+      document.getElementById('procBar').style.width = '100%';
+    }, 36000);
+  </script>
+
+</body>
+</html>

@@ -224,6 +224,13 @@ Optimized Order:
                 "link": ret_link
             })
 
+        cost_breakdown={
+            "flight": flight_cost,
+            "hotel": hotel_cost,
+            "local_transport": local_cost,
+            "food": food_cost
+        }
+
         # -----------------------------
         # FINAL TEXT HEADER
         # -----------------------------
@@ -235,12 +242,25 @@ Optimized Order:
         # -----------------------------
 
         return {
-            "constraints": constraints,
-            "estimated_cost": total_cost,
-            "final_plan": final_plan,
+            "destination": destination,
+            "days_count": days,
+
             "hotel": hotel_name,
-            "ordered_places": ordered_places,
+
+            "constraints": constraints,
+
+            "estimated_cost": total_cost,
+
+            "cost_breakdown": cost_breakdown,
+
+            "attractions": ordered_places,
+
             "daily_plan": daily_plan,
-            "transport": transport_rows
+
+            "transport": transport_rows,
+
+            # AI reasoning moved seperately
+
+            "ai_reasoning": final_plan
         }
 
