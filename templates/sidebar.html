@@ -1,0 +1,46 @@
+<aside class="sidebar">
+  <div class="sidebar-top">
+    <a href="/dashboard" class="sidebar-brand">
+      <div class="sidebar-brand-mark"><i data-lucide="compass"></i></div>
+      <span class="sidebar-brand-name">TravelMind</span>
+    </a>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="sidebar-section-label">Menu</div>
+    <a href="/dashboard" class="s-link {{ 'active' if active_page == 'dashboard' else '' }}">
+      <span class="s-icon"><i data-lucide="layout-dashboard"></i></span> Home
+    </a>
+    <a href="/create" class="s-link {{ 'active' if active_page == 'create' else '' }}">
+      <span class="s-icon"><i data-lucide="plus"></i></span> New Trip
+    </a>
+    <a href="/trips" class="s-link {{ 'active' if active_page == 'trips' else '' }}">
+      <span class="s-icon"><i data-lucide="folder"></i></span> Saved Trips
+    </a>
+
+    <div class="sidebar-section-label">Account</div>
+    <a href="/profile" class="s-link {{ 'active' if active_page == 'profile' else '' }}">
+      <span class="s-icon"><i data-lucide="user"></i></span> Profile
+    </a>
+  </nav>
+
+  <div class="sidebar-bottom">
+    <div class="sidebar-user">
+      <div class="sidebar-avatar">{{ username[0].upper() if username else 'U' }}</div>
+      <div class="sidebar-user-info">
+        <div class="sidebar-user-name">{{ username }}</div>
+        <div class="sidebar-user-role">Traveller</div>
+      </div>
+    </div>
+    <form action="/logout" method="GET">
+      <button type="submit" class="sidebar-logout"><i data-lucide="log-out"></i> Sign Out</button>
+    </form>
+  </div>
+</aside>
+
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    if (window.lucide) lucide.createIcons();
+  });
+</script>

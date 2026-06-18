@@ -4,145 +4,159 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>TravelMind AI — Plan a Trip</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/style.css"/>
 </head>
-<body class="app-page">
+<body>
+<div class="app-shell">
 
-  <div class="app-layout">
+  {% set active_page = 'create' %}
+  {% include 'sidebar.html' %}
 
-    <!-- SIDEBAR -->
-    <aside class="sidebar">
-      <div class="sidebar-brand">
-        <span class="nav-logo">✦</span>
-        <span class="nav-name">TravelMind</span>
+  <div class="app-main">
+    <div class="app-topbar">
+      <div>
+        <div class="topbar-title">New Trip</div>
+        <div class="topbar-sub">Tell the agents what you need</div>
       </div>
-      <nav class="sidebar-nav">
-        <a href="/dashboard" class="s-link">
-          <span class="s-icon">⊞</span> Home
-        </a>
-        <a href="/create" class="s-link active">
-          <span class="s-icon">＋</span> Create Trip
-        </a>
-        <a href="/trips" class="s-link">
-          <span class="s-icon">📂</span> Saved Trips
-        </a>
-        <a href="/profile" class="s-link">
-          <span class="s-icon">◯</span> Profile
-        </a>
-      </nav>
-      <div class="sidebar-footer">
-        <a href="/logout" class="s-logout">↩ Logout</a>
-      </div>
-    </aside>
+    </div>
 
-    <!-- MAIN -->
-    <main class="app-main">
+    <div class="app-content">
+      <div class="create-layout">
 
-      <div class="create-header">
-        <h1 class="app-heading">Create New Trip</h1>
-        <p class="app-subheading">Our agent team will build your perfect itinerary</p>
-      </div>
-
-      <div class="create-card-wrap">
-        <form class="create-form" id="tripForm" action="/plan" method="POST">
-
-          <div class="form-row-2">
-            <div class="form-group">
-              <label>Your Name</label>
-              <input type="text" name="name" placeholder="Sanjoli" required/>
+        <!-- FORM -->
+        <form id="tripForm" action="/plan" method="POST">
+          <div class="create-form-card fade-up">
+            <h2>Trip Details</h2>
+            <div class="form-grid-2" style="margin-bottom:1rem">
+              <div class="form-group">
+                <label class="form-label">Your Name</label>
+                <input class="form-input" type="text" name="name" placeholder="Sanjoli" required/>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Destination</label>
+                <input class="form-input" type="text" name="destination" placeholder="Jaipur, Goa, Delhi..." required/>
+              </div>
             </div>
-            <div class="form-group">
-              <label>Destination</label>
-              <input type="text" name="destination" placeholder="Jaipur, Goa, Delhi..." required/>
+
+            <div class="form-group" style="margin-bottom:1rem">
+              <label class="form-label">Number of Days</label>
+              <div class="days-control">
+                <button type="button" class="days-btn" onclick="changeDays(-1)"><i data-lucide="minus"></i></button>
+                <input class="days-input" type="number" name="days" id="daysInput" value="3" min="1" max="30" required/>
+                <button type="button" class="days-btn" onclick="changeDays(1)"><i data-lucide="plus"></i></button>
+              </div>
             </div>
-          </div>
 
-          <div class="form-group">
-            <label>Number of Days</label>
-            <div class="days-selector">
-              <button type="button" class="days-btn" onclick="changeDays(-1)">−</button>
-              <input type="number" name="days" id="daysInput" value="3" min="1" max="30" required/>
-              <button type="button" class="days-btn" onclick="changeDays(1)">＋</button>
+            <hr class="form-section-divider" style="margin-bottom:1rem"/>
+
+            <div class="form-group" style="margin-bottom:1rem">
+              <label class="form-label">Travel Preferences</label>
+              
+              <textarea class="form-textarea" name="needs" rows="4" placeholder="E.g. Budget trip, vegetarian food, low walking...">Budget trip with good experiences</textarea>
             </div>
-          </div>
 
-          <div class="form-group">
-            <label>Describe Your Travel Preferences</label>
-            <textarea name="needs" rows="4" placeholder="E.g. Budget trip, vegetarian food, low walking, travelling with elderly parents, want cultural experiences..."></textarea>
-          </div>
-
-          <div class="form-group">
-            <label>Quick Preferences</label>
-            <div class="toggle-grid">
-              <label class="toggle-pill">
-                <input type="checkbox" name="low_walking" value="true"/>
-                <span>🚶 Low Walking</span>
-              </label>
-              <label class="toggle-pill">
-                <input type="checkbox" name="budget_strict" value="true"/>
-                <span>💰 Strict Budget</span>
-              </label>
-              <label class="toggle-pill">
-                <input type="checkbox" name="elderly" value="true"/>
-                <span>👴 With Elderly</span>
-              </label>
-              <label class="toggle-pill">
-                <input type="checkbox" name="vegetarian" value="true"/>
-                <span>🥗 Vegetarian</span>
-              </label>
+            <div class="form-group" style="margin-bottom:1.5rem">
+              <label class="form-label">Quick Toggles</label>
+              <div class="toggle-group">
+                <label class="toggle-item">
+                  <input type="checkbox" name="low_walking" value="true"/>
+                  <span><i data-lucide="footprints"></i> Low Walking</span>
+                </label>
+                <label class="toggle-item">
+                  <input type="checkbox" name="budget_strict" value="true"/>
+                  <span><i data-lucide="wallet"></i> Strict Budget</span>
+                </label>
+                <label class="toggle-item">
+                  <input type="checkbox" name="elderly" value="true"/>
+                  <span><i data-lucide="user"></i> With Elderly</span>
+                </label>
+                <label class="toggle-item">
+                  <input type="checkbox" name="vegetarian" value="true"/>
+                  <span><i data-lucide="salad"></i> Vegetarian</span>
+                </label>
+                <label class="toggle-item">
+                  <input type="checkbox" name="family" value="true"/>
+                  <span><i data-lucide="users"></i> Family Trip</span>
+                </label>
+              </div>
             </div>
+
+            <button type="submit" class="btn btn-primary btn-full btn-lg" id="submitBtn">
+              <span id="btnText">Generate AI Plan <i data-lucide="arrow-right"></i></span>
+              <span id="btnLoader" style="display:none"><i data-lucide="loader-2" class="spin"></i> Agents working...</span>
+            </button>
           </div>
-
-          <button type="submit" class="btn-primary btn-full btn-large" id="submitBtn">
-            <span class="btn-text">Generate AI Plan →</span>
-            <span class="btn-loader" style="display:none">Processing...</span>
-          </button>
-
         </form>
 
-        <div class="create-side-info">
-          <div class="info-card">
-            <div class="info-icon">🧠</div>
-            <h4>What happens next?</h4>
-            <ul class="info-steps">
-              <li>UserAgent extracts your constraints</li>
-              <li>BudgetAgent searches real hotels</li>
-              <li>ExperienceAgent finds attractions</li>
-              <li>NegotiatorAgent merges the best plan</li>
-              <li>MapsOptimizer orders your route</li>
-            </ul>
+        <!-- SIDEBAR INFO -->
+        <div>
+          <div class="create-sidebar-card fade-up fade-up-1">
+            <h4><i data-lucide="brain"></i> What happens next?</h4>
+            <div class="agent-step-list">
+              <div class="agent-step">
+                <div class="agent-step-icon"><i data-lucide="user"></i></div>
+                UserAgent extracts your constraints
+              </div>
+              <div class="agent-step">
+                <div class="agent-step-icon"><i data-lucide="wallet"></i></div>
+                BudgetAgent finds hotels &amp; flights
+              </div>
+              <div class="agent-step">
+                <div class="agent-step-icon"><i data-lucide="sofa"></i></div>
+                ComfortAgent optimizes comfort
+              </div>
+              <div class="agent-step">
+                <div class="agent-step-icon"><i data-lucide="party-popper"></i></div>
+                ExperienceAgent picks attractions
+              </div>
+              <div class="agent-step">
+                <div class="agent-step-icon"><i data-lucide="handshake"></i></div>
+                NegotiatorAgent merges all plans
+              </div>
+              <div class="agent-step">
+                <div class="agent-step-icon"><i data-lucide="map"></i></div>
+                MapsOptimizer orders your route
+              </div>
+            </div>
           </div>
-          <div class="info-card" style="margin-top:1rem">
-            <div class="info-icon">⚡</div>
-            <h4>Powered by</h4>
-            <p style="font-size:0.85rem;opacity:0.7;margin-top:0.3rem;">Gemini 2.5 Flash · Google Maps API · SerpAPI Hotels</p>
+
+          <div class="create-sidebar-card fade-up fade-up-2">
+            <h4><i data-lucide="zap"></i> Powered by</h4>
+            <div style="display:flex;flex-direction:column;gap:0.5rem;margin-top:0.5rem">
+              <span class="badge badge-blue">Gemini 2.5 Flash</span>
+              <span class="badge badge-teal">Google Maps API</span>
+              <span class="badge badge-amber">SerpAPI Hotels</span>
+            </div>
+          </div>
+
+          <div class="create-sidebar-card fade-up fade-up-3" style="background:var(--blue-lt);border-color:#bfdbfe">
+            <h4 style="color:var(--blue)"><i data-lucide="lightbulb"></i> Tip</h4>
+            <p style="font-size:0.82rem;color:var(--gray-600);margin-top:0.3rem;line-height:1.6">
+              The more detail you add to preferences, the better the AI can personalize your trip. Mention food habits, pace, mobility needs.
+            </p>
           </div>
         </div>
+
       </div>
-
-    </main>
+    </div>
   </div>
+</div>
 
-  <script>
-    function changeDays(delta) {
-      const inp = document.getElementById('daysInput');
-      const val = parseInt(inp.value) + delta;
-      if (val >= 1 && val <= 30) inp.value = val;
-    }
+<script>
+  function changeDays(d) {
+    const inp = document.getElementById('daysInput');
+    const v = parseInt(inp.value) + d;
+    if (v >= 1 && v <= 30) inp.value = v;
+  }
 
-    document.getElementById('tripForm').addEventListener('submit', function(e) {
-      document.getElementById('submitBtn').disabled = true;
-      document.querySelector('.btn-text').style.display = 'none';
-      document.querySelector('.btn-loader').style.display = 'inline';
-      // Redirect to processing screen
-      const dest = document.querySelector('[name=destination]').value;
-      const days = document.getElementById('daysInput').value;
-      sessionStorage.setItem('tripDest', dest);
-      sessionStorage.setItem('tripDays', days);
-    });
-  </script>
-
+  document.getElementById('tripForm').addEventListener('submit', function() {
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    document.getElementById('btnText').style.display = 'none';
+    document.getElementById('btnLoader').style.display = 'inline';
+    sessionStorage.setItem('tripDest', document.querySelector('[name=destination]').value);
+    sessionStorage.setItem('tripDays', document.getElementById('daysInput').value);
+  });
+</script>
 </body>
 </html>

@@ -4,91 +4,97 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>TravelMind AI — Dashboard</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/style.css"/>
 </head>
-<body class="app-page">
+<body>
+<div class="app-shell">
 
-  <div class="app-layout">
+  {% set active_page = 'dashboard' %}
+  {% include 'sidebar.html' %}
 
-    <!-- SIDEBAR -->
-    <aside class="sidebar">
-      <div class="sidebar-brand">
-        <span class="nav-logo">✦</span>
-        <span class="nav-name">TravelMind</span>
+  <div class="app-main">
+    <div class="app-topbar">
+      <div>
+        <div class="topbar-title">Dashboard</div>
+        <div class="topbar-sub">Welcome back, {{ username }}</div>
       </div>
-      <nav class="sidebar-nav">
-        <a href="/dashboard" class="s-link active">
-          <span class="s-icon">⊞</span> Home
-        </a>
-        <a href="/create" class="s-link">
-          <span class="s-icon">＋</span> Create Trip
-        </a>
-        <a href="/trips" class="s-link">
-          <span class="s-icon">📂</span> Saved Trips
-        </a>
-        <a href="/profile" class="s-link">
-          <span class="s-icon">◯</span> Profile
-        </a>
-      </nav>
-      <div class="sidebar-footer">
-        <a href="/logout" class="s-logout">↩ Logout</a>
-      </div>
-    </aside>
+      <a href="/create" class="btn btn-primary"><i data-lucide="plus"></i> New Trip</a>
+    </div>
 
-    <!-- MAIN -->
-    <main class="app-main">
+    <div class="app-content">
 
-      <div class="app-topbar">
-        <div>
-          <h1 class="app-heading">Good afternoon, {{ username }} 👋</h1>
-          <p class="app-subheading">Where are we going next?</p>
+      <!-- WELCOME BANNER -->
+      <div class="dash-welcome fade-up">
+        <div class="dash-welcome-text">
+          <h1>Good to see you, {{ username }} <i data-lucide="hand"></i></h1>
+          <p>Where are we going next? Let the agents plan it for you.</p>
         </div>
-        <a href="/create" class="btn-primary">＋ New Trip</a>
+        <a href="/create" class="btn-hero-primary" style="position:relative;z-index:2">Plan a Trip <i data-lucide="arrow-right"></i></a>
       </div>
 
-      <!-- QUICK CREATE CARD -->
-      <div class="dash-hero-card">
-        <div class="dhc-bg">
-          <div class="orb orb-dash-1"></div>
-          <div class="orb orb-dash-2"></div>
+      <!-- STATS ROW -->
+      <div class="stats-row fade-up fade-up-1">
+        <div class="stat-card">
+          <div class="stat-icon stat-icon-blue"><i data-lucide="plane"></i></div>
+          <div>
+            <div class="stat-val">{{ recent_trips | length }}</div>
+            <div class="stat-label">Total Trips</div>
+          </div>
         </div>
-        <div class="dhc-content">
-          <div class="dhc-badge">AI-Powered</div>
-          <h2>Plan Your Next Adventure</h2>
-          <p>Tell our agent team your needs and get a fully optimized itinerary in seconds.</p>
-          <a href="/create" class="btn-primary">Start Planning →</a>
+        <div class="stat-card">
+          <div class="stat-icon stat-icon-teal"><i data-lucide="brain"></i></div>
+          <div>
+            <div class="stat-val">5</div>
+            <div class="stat-label">AI Agents</div>
+          </div>
         </div>
-        <div class="dhc-visual">✈</div>
+        <div class="stat-card">
+          <div class="stat-icon stat-icon-amber"><i data-lucide="zap"></i></div>
+          <div>
+            <div class="stat-val">Parallel</div>
+            <div class="stat-label">Execution Mode</div>
+          </div>
+        </div>
       </div>
 
       <!-- RECENT TRIPS -->
-      <div class="section-row">
-        <h2 class="section-mini-title">Recent Trips</h2>
-        <a href="/trips" class="see-all">See all →</a>
-      </div>
+      <div class="fade-up fade-up-2">
+        <div class="section-header-row">
+          <span class="section-h">Recent Trips</span>
+          <a href="/trips" class="see-all">View all <i data-lucide="arrow-right"></i></a>
+        </div>
 
-      <div class="trips-grid">
         {% if recent_trips %}
+        <div class="trips-grid">
           {% for trip in recent_trips %}
           <a href="/result/{{ trip.id }}" class="trip-card">
-            <div class="trip-card-dest">{{ trip.destination }}</div>
-            <div class="trip-card-meta">{{ trip.days }} days · ₹{{ trip.cost }}</div>
-            <div class="trip-card-arrow">→</div>
+            <div class="trip-card-top">
+              <div class="trip-dest">{{ trip.destination }}</div>
+              <div class="trip-date">{{ trip.created_at.strftime('%d %b') if trip.created_at else '' }}</div>
+            </div>
+            <div class="trip-meta">
+              <span class="badge badge-blue">{{ trip.days_count }} days</span>
+              <span class="badge badge-gray">{{ trip.hotel[:20] ~ '...' if trip.hotel and trip.hotel|length > 20 else trip.hotel }}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <span class="trip-cost">₹{{ "{:,.0f}".format(trip.estimated_cost) if trip.estimated_cost else 'N/A' }}</span>
+              <span class="trip-arrow">View <i data-lucide="arrow-right"></i></span>
+            </div>
           </a>
           {% endfor %}
+        </div>
         {% else %}
-          <div class="empty-state">
-            <div class="empty-icon">🌍</div>
-            <p>No trips yet. Create your first one!</p>
-            <a href="/create" class="btn-primary" style="margin-top:1rem;">Plan a Trip</a>
-          </div>
+        <div class="empty-state">
+          <div class="empty-icon"><i data-lucide="globe"></i></div>
+          <h3>No trips yet</h3>
+          <p>Create your first AI-planned trip and it will appear here.</p>
+          <a href="/create" class="btn btn-primary">Plan Your First Trip</a>
+        </div>
         {% endif %}
       </div>
 
-    </main>
+    </div>
   </div>
-
+</div>
 </body>
 </html>

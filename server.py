@@ -1,198 +1,337 @@
 """
-TravelMind AI — FastAPI Server
-Handles all routes for the new multi-page frontend.
+server.py — TravelMind AI
+FastAPI server: JWT auth + SQLite + parallel agents
+Run: uvicorn server:app --reload
 """
 
-from fastapi import FastAPI, Form, Request
+import json
+from fastapi import FastAPI, Form, Request, Depends
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from fastapi.middleware.cors import CORSMiddleware
-import json
+from sqlalchemy.orm import Session
 
+from database import init_db, get_db, User, Trip
+from auth import hash_password, verify_password, create_access_token, get_current_user
 from agents.manager_agent import ManagerAgent
+from core.constraints import DEFAULT_MAX_BUDGET
 
 app = FastAPI(title="TravelMind AI")
 agent = ManagerAgent()
 
-# Static + templates
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
-# In-memory trip store (replace with a database in production)
-trip_store: dict = {}
-trip_counter = {"n": 0}
+
+@app.on_event("startup")
+def startup():
+    init_db()
+    print("Database ready: travelmind.db")
 
 
-# ============================================================
-# LANDING
-# ============================================================
+# ── HELPERS ───────────────────────────────────────────────────
+
+def base_ctx(request: Request, user: dict, extra: dict = None) -> dict:
+    """
+    Build the base template context that every page needs.
+    Includes username so the sidebar always renders correctly.
+    """
+    ctx = {
+        "request":  request,
+        "username": user.get("name", "Traveller") if user else "Traveller",
+    }
+    if extra:
+        ctx.update(extra)
+    return ctx
+
+
+def build_insights(trip) -> list:
+    """Derive AI Insights cards from this trip's actual data."""
+    transport = trip.transport
+    daily_plan = trip.daily_plan
+    constraints = trip.constraints
+
+    walk_count = sum(1 for leg in transport if leg.get("mode") == "WALK")
+    cab_count  = sum(1 for leg in transport if leg.get("mode") == "CAB")
+
+    total_km = 0.0
+    for leg in transport:
+        try:
+            total_km += float(str(leg.get("distance", "")).lower().replace("km", "").strip())
+        except ValueError:
+            pass
+
+    num_days = len(daily_plan) or trip.days_count
+    avg_per_day = round(len(trip.attractions) / num_days, 1) if num_days else 0
+
+    budget_pct = round((trip.estimated_cost / DEFAULT_MAX_BUDGET) * 100) if trip.estimated_cost else 0
+
+    applied_constraints = [
+        f"{k.replace('_', ' ').title()}: {v}"
+        for k, v in constraints.items()
+        if k != "raw" and str(v).lower() not in ("none", "null", "false", "", "[]", "{}")
+    ]
+
+    return [
+        {
+            "title": "Route Optimized",
+            "text": f"Nearest-neighbor ordering covered {round(total_km, 1)} km across "
+                    f"{len(transport)} legs, minimizing total travel time between attractions."
+        },
+        {
+            "title": "Central Hotel Selected",
+            "text": f"{trip.hotel} was chosen in {trip.destination} to keep cab distances "
+                    f"short while staying within the ₹{DEFAULT_MAX_BUDGET:,} budget ceiling."
+        },
+        {
+            "title": "Daily Load Balanced",
+            "text": f"{len(trip.attractions)} attractions spread across {num_days} day"
+                    f"{'s' if num_days != 1 else ''} (~{avg_per_day} per day), each capped at 8 hours of activity."
+        },
+        {
+            "title": "Walk vs Cab Decided",
+            "text": f"{walk_count} leg{'s' if walk_count != 1 else ''} marked walkable (under 800m/12min), "
+                    f"{cab_count} recommended by cab for longer distances."
+        },
+        {
+            "title": "Constraints Applied",
+            "text": ", ".join(applied_constraints) if applied_constraints
+                    else "No specific preferences were captured for this trip."
+        },
+        {
+            "title": "Budget Usage",
+            "text": f"Estimated cost ₹{trip.estimated_cost:,.0f} is {budget_pct}% of the ₹{DEFAULT_MAX_BUDGET:,} budget ceiling."
+                    if trip.estimated_cost else "Cost could not be estimated for this trip."
+        },
+    ]
+
+
+# ── LANDING ───────────────────────────────────────────────────
 
 @app.get("/", response_class=HTMLResponse)
 def landing(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 
-# ============================================================
-# AUTH (stub — wire to real auth system as needed)
-# ============================================================
+# ── AUTH ──────────────────────────────────────────────────────
 
 @app.get("/login", response_class=HTMLResponse)
 def login_page(request: Request):
-    return templates.TemplateResponse("login.html", {"request": request})
+    if get_current_user(request):
+        return RedirectResponse("/dashboard", 302)
+    return templates.TemplateResponse("login.html", {"request": request, "error": None})
 
 
 @app.post("/login", response_class=HTMLResponse)
-def login_submit(request: Request, email: str = Form(...), password: str = Form(...)):
-    # TODO: Replace with real auth. For now, derive username from email.
-    username = email.split("@")[0]
-    # Store username in a simple cookie (use sessions in production)
-    response = RedirectResponse(url="/dashboard", status_code=302)
-    response.set_cookie("username", username)
-    return response
+def login(
+    request: Request,
+    email: str    = Form(...),
+    password: str = Form(...),
+    db: Session   = Depends(get_db),
+):
+    user = db.query(User).filter(User.email == email).first()
+    if not user or not verify_password(password, user.hashed_password):
+        return templates.TemplateResponse("login.html", {
+            "request": request,
+            "error": "Invalid email or password."
+        })
+    token = create_access_token({"sub": str(user.id), "email": user.email, "name": user.name})
+    resp  = RedirectResponse("/dashboard", 302)
+    resp.set_cookie("access_token", token, httponly=True, max_age=604800)
+    return resp
 
 
 @app.post("/signup", response_class=HTMLResponse)
-def signup_submit(request: Request, name: str = Form(...), email: str = Form(...), password: str = Form(...)):
-    username = name.split()[0] if name else email.split("@")[0]
-    response = RedirectResponse(url="/dashboard", status_code=302)
-    response.set_cookie("username", username)
-    return response
+def signup(
+    request: Request,
+    name: str     = Form(...),
+    email: str    = Form(...),
+    password: str = Form(...),
+    db: Session   = Depends(get_db),
+):
+    if db.query(User).filter(User.email == email).first():
+        return templates.TemplateResponse("login.html", {
+            "request": request,
+            "error": "Email already registered. Please log in."
+        })
+    new_user = User(name=name, email=email, hashed_password=hash_password(password))
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    token = create_access_token({"sub": str(new_user.id), "email": new_user.email, "name": new_user.name})
+    resp  = RedirectResponse("/dashboard", 302)
+    resp.set_cookie("access_token", token, httponly=True, max_age=604800)
+    return resp
 
 
 @app.get("/logout")
 def logout():
-    response = RedirectResponse(url="/", status_code=302)
-    response.delete_cookie("username")
-    return response
+    resp = RedirectResponse("/", 302)
+    resp.delete_cookie("access_token")
+    return resp
 
 
-# ============================================================
-# DASHBOARD
-# ============================================================
+# ── DASHBOARD ─────────────────────────────────────────────────
 
 @app.get("/dashboard", response_class=HTMLResponse)
-def dashboard(request: Request):
-    username = request.cookies.get("username", "Traveler")
-    # Collect saved trips for this user
-    recent = [
-        {**v, "id": k}
-        for k, v in trip_store.items()
-        if v.get("username") == username
-    ][-5:]  # last 5
-    return templates.TemplateResponse("dashboard.html", {
-        "request": request,
-        "username": username,
-        "recent_trips": recent
-    })
+def dashboard(request: Request, db: Session = Depends(get_db)):
+    user = get_current_user(request)
+    if not user:
+        return RedirectResponse("/login", 302)
+
+    recent = (
+        db.query(Trip)
+        .filter(Trip.user_id == int(user["sub"]))
+        .order_by(Trip.created_at.desc())
+        .limit(6)
+        .all()
+    )
+    return templates.TemplateResponse(
+        "dashboard.html",
+        base_ctx(request, user, {"recent_trips": recent, "active_page": "dashboard"})
+    )
 
 
-# ============================================================
-# CREATE TRIP
-# ============================================================
+# ── CREATE TRIP ───────────────────────────────────────────────
 
 @app.get("/create", response_class=HTMLResponse)
 def create_page(request: Request):
-    return templates.TemplateResponse("create.html", {"request": request})
+    user = get_current_user(request)
+    if not user:
+        return RedirectResponse("/login", 302)
+    return templates.TemplateResponse(
+        "create.html",
+        base_ctx(request, user, {"active_page": "create"})
+    )
 
 
-# ============================================================
-# PLAN (SUBMIT FORM)
-# Redirects through processing screen, then shows result.
-# ============================================================
+# ── PLAN ─────────────────────────────────────────────────────
 
 @app.post("/plan", response_class=HTMLResponse)
 def create_plan(
     request: Request,
-    name: str = Form(...),
-    needs: str = Form(...),
+    name: str        = Form(...),
+    needs: str = Form(default=""),
     destination: str = Form(...),
-    days: int = Form(...)
+    days: int        = Form(...),
+    db: Session      = Depends(get_db),
 ):
-    # Run the agent pipeline
+    
+    
+    user = get_current_user(request)
+    if not user:
+        return RedirectResponse("/login", 302)
+
+    # Run the full agent pipeline
     result = agent.build_travel_plan(name, needs, destination, days)
 
-    # Store trip
-    trip_counter["n"] += 1
-    tid = str(trip_counter["n"])
-    trip_store[tid] = {
-        "username": name,
-        "destination": result["destination"],
-        "days": result["days_count"],
-        "hotel": result["hotel"],
-        "cost": result["estimated_cost"],
-        "date": "Today",
-        **result
-    }
+    # Persist to SQLite
+    trip = Trip(
+        user_id             = int(user["sub"]),
+        username            = user["name"],
+        destination         = result["destination"],
+        days_count          = result["days_count"],
+        hotel               = result["hotel"],
+        estimated_cost      = result["estimated_cost"],
+        constraints_json    = json.dumps(result["constraints"]),
+        cost_breakdown_json = json.dumps(result["cost_breakdown"]),
+        attractions_json    = json.dumps(result["attractions"]),
+        daily_plan_json     = json.dumps(result["daily_plan"]),
+        transport_json      = json.dumps(result["transport"]),
+        ai_reasoning        = result["ai_reasoning"],
+    )
+    db.add(trip)
+    db.commit()
+    db.refresh(trip)
+    return RedirectResponse(f"/result/{trip.id}", 302)
 
-    return RedirectResponse(url=f"/result/{tid}", status_code=302)
 
-
-# ============================================================
-# RESULT PAGE
-# ============================================================
+# ── RESULT ────────────────────────────────────────────────────
 
 @app.get("/result/{trip_id}", response_class=HTMLResponse)
-def result_page(request: Request, trip_id: str):
-    trip = trip_store.get(trip_id)
-    if not trip:
-        return RedirectResponse(url="/dashboard", status_code=302)
+def result_page(request: Request, trip_id: int, db: Session = Depends(get_db)):
+    user = get_current_user(request)
+    if not user:
+        return RedirectResponse("/login", 302)
 
-    return templates.TemplateResponse("result.html", {
-        "request": request,
-        "destination": trip["destination"],
-        "days_count": trip["days_count"],
-        "hotel": trip["hotel"],
-        "constraints": trip["constraints"],
-        "cost": trip["estimated_cost"],
-        "cost_breakdown": trip["cost_breakdown"],
-        "daily_plan": trip["daily_plan"],
-        "attractions": trip["attractions"],
-        "transport": trip["transport"],
-        "ai_reasoning": trip["ai_reasoning"]
-    })
+    trip = db.query(Trip).filter(Trip.id == trip_id).first()
+    if not trip or trip.user_id != int(user["sub"]):
+        return RedirectResponse("/dashboard", 302)
+
+    return templates.TemplateResponse(
+        "result.html",
+        base_ctx(request, user, {
+            "active_page":    "trips",
+            "destination":    trip.destination,
+            "days_count":     trip.days_count,
+            "hotel":          trip.hotel,
+            "constraints":    trip.constraints,
+            "cost":           trip.estimated_cost,
+            "cost_breakdown": trip.cost_breakdown,
+            "daily_plan":     trip.daily_plan,
+            "attractions":    trip.attractions,
+            "transport":      trip.transport,
+            "ai_reasoning":   trip.ai_reasoning,
+            "insights":       build_insights(trip),
+        })
+    )
 
 
-# ============================================================
-# SAVED TRIPS
-# ============================================================
+# ── SAVED TRIPS ───────────────────────────────────────────────
 
 @app.get("/trips", response_class=HTMLResponse)
-def trips_page(request: Request):
-    username = request.cookies.get("username", "Traveler")
-    trips = [
-        {**v, "id": k}
-        for k, v in trip_store.items()
-        if v.get("username") == username
-    ]
-    return templates.TemplateResponse("trips.html", {
-        "request": request,
-        "trips": trips
-    })
+def trips_page(request: Request, db: Session = Depends(get_db)):
+    user = get_current_user(request)
+    if not user:
+        return RedirectResponse("/login", 302)
+
+    trips = (
+        db.query(Trip)
+        .filter(Trip.user_id == int(user["sub"]))
+        .order_by(Trip.created_at.desc())
+        .all()
+    )
+    return templates.TemplateResponse(
+        "trips.html",
+        base_ctx(request, user, {"trips": trips, "active_page": "trips"})
+    )
 
 
-# ============================================================
-# PROFILE
-# ============================================================
+@app.post("/trips/{trip_id}/delete")
+def delete_trip(request: Request, trip_id: int, db: Session = Depends(get_db)):
+    user = get_current_user(request)
+    if not user:
+        return RedirectResponse("/login", 302)
+
+    trip = db.query(Trip).filter(Trip.id == trip_id).first()
+    if trip and trip.user_id == int(user["sub"]):
+        db.delete(trip)
+        db.commit()
+
+    return RedirectResponse("/trips", 302)
+
+
+# ── PROFILE ───────────────────────────────────────────────────
 
 @app.get("/profile", response_class=HTMLResponse)
-def profile_page(request: Request):
-    username = request.cookies.get("username", "Traveler")
-    return templates.TemplateResponse("profile.html", {
-        "request": request,
-        "username": username
-    })
+def profile_page(request: Request, db: Session = Depends(get_db)):
+    user = get_current_user(request)
+    if not user:
+        return RedirectResponse("/login", 302)
+
+    db_user = db.query(User).filter(User.id == int(user["sub"])).first()
+    return templates.TemplateResponse(
+        "profile.html",
+        base_ctx(request, user, {
+            "active_page":  "profile",
+            "email":        user.get("email", ""),
+            "member_since": db_user.created_at.strftime("%B %Y") if db_user else "N/A",
+        })
+    )
 
 
-# ============================================================
-# PROCESSING SCREEN (optional standalone page)
-# ============================================================
+# ── PROCESSING (standalone page) ─────────────────────────────
 
 @app.get("/processing", response_class=HTMLResponse)
 def processing_page(request: Request):
     return templates.TemplateResponse("processing.html", {"request": request})
-
-
-# ============================================================
-# Run: uvicorn server:app --reload
-# ============================================================

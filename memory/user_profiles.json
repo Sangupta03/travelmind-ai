@@ -1,8 +1,0 @@
-{
-    "Sanju": {
-        "last_constraints": "```json\n{\n  \"budget\": \"budget\",\n  \"walking_preference\": \"low\",\n  \"food_preference\": \"vegetarian\",\n  \"pace\": \"slow\",\n  \"travel_with_elderly\": true\n}\n```"
-    },
-    "Sanjog Gupta ": {
-        "last_constraints": "```json\n{\n  \"budget\": \"low\",\n  \"walking_preference\": \"low\",\n  \"food_preference\": \"vegetarian\",\n  \"pace\": null,\n  \"travel_with_elderly\": true\n}\n```"
-    }
-}

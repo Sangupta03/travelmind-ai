@@ -1,174 +1,197 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>TravelMind AI — Plan Smart Trips with AI Agents</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/style.css">
+  <title>TravelMind AI — Agentic AI Travel Planner</title>
+  <link rel="stylesheet" href="/static/style.css"/>
 </head>
-<body class="landing-page">
+<body>
 
-  <!-- NAV -->
-  <nav class="nav">
-    <div class="nav-brand">
-      <span class="nav-logo">✦</span>
-      <span class="nav-name">TravelMind</span>
-      <span class="nav-tag">AI</span>
-    </div>
-    <div class="nav-links">
-      <a href="#features">Features</a>
-      <a href="#how">How It Works</a>
-      <a href="/login" class="nav-cta">Get Started</a>
-    </div>
-  </nav>
+<!-- NAV -->
+<nav class="landing-nav">
+  <div class="brand">
+    <div class="brand-mark"><i data-lucide="compass"></i></div>
+    <span class="brand-name">TravelMind</span>
+    <span class="brand-tag">AI</span>
+  </div>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#how">How It Works</a>
+    <a href="/login" class="btn btn-primary" style="padding:0.5rem 1.2rem">Get Started</a>
+  </div>
+</nav>
 
-  <!-- HERO -->
-  <section class="hero">
-    <div class="hero-bg">
-      <div class="orb orb-1"></div>
-      <div class="orb orb-2"></div>
-      <div class="orb orb-3"></div>
-      <div class="grid-overlay"></div>
-    </div>
-
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-inner">
     <div class="hero-content">
-      <div class="hero-badge">
-        <span class="badge-dot"></span>
-        Multi-Agent AI System
+      <div class="hero-eyebrow fade-up">
+        <span class="eyebrow-dot"></span>
+        Powered by Gemini 2.5 Flash
       </div>
-      <h1 class="hero-title">
-        Plan Smart Trips<br/>
-        <span class="hero-gradient">with AI Agents</span>
+      <h1 class="hero-title fade-up fade-up-1">
+        Plan Smarter Trips<br/>with <span>AI Agents</span>
       </h1>
-      <p class="hero-sub">
-        A multi-agent reasoning system that negotiates budget, comfort, and experience
-        to build your perfect itinerary — powered by Gemini 2.5 Flash.
+      <p class="hero-subtitle fade-up fade-up-2">
+        Five specialized AI agents collaborate, negotiate, and optimize your perfect itinerary — balancing budget, comfort, and experience in real time.
       </p>
-      <div class="hero-actions">
-        <a href="/login" class="btn-primary">Start Planning <span class="btn-arrow">→</span></a>
-        <a href="#how" class="btn-ghost">See How It Works</a>
+      <div class="hero-actions fade-up fade-up-3">
+        <a href="/login" class="btn-hero-primary">Start Planning <i data-lucide="arrow-right"></i></a>
+        <a href="#how" class="btn-hero-ghost">See How It Works</a>
       </div>
-      <div class="hero-stats">
-        <div class="stat"><span class="stat-num">5</span><span class="stat-label">AI Agents</span></div>
-        <div class="stat-div"></div>
-        <div class="stat"><span class="stat-num">Real</span><span class="stat-label">Maps Data</span></div>
-        <div class="stat-div"></div>
-        <div class="stat"><span class="stat-num">Live</span><span class="stat-label">Optimization</span></div>
-      </div>
-    </div>
-
-    <div class="hero-visual">
-      <div class="agent-ring">
-        <div class="center-node">
-          <span class="center-icon">🧠</span>
-          <span class="center-label">Manager</span>
+      <div class="hero-stats fade-up fade-up-4">
+        <div class="h-stat">
+          <div class="h-stat-num">5</div>
+          <div class="h-stat-label">AI Agents</div>
         </div>
-        <div class="agent-node node-1"><span>💰</span><small>Budget</small></div>
-        <div class="agent-node node-2"><span>🛋</span><small>Comfort</small></div>
-        <div class="agent-node node-3"><span>🎉</span><small>Experience</small></div>
-        <div class="agent-node node-4"><span>🤝</span><small>Negotiator</small></div>
-        <div class="agent-node node-5"><span>👤</span><small>User</small></div>
-        <svg class="ring-svg" viewBox="0 0 300 300">
-          <circle cx="150" cy="150" r="110" fill="none" stroke="rgba(255,200,100,0.15)" stroke-width="1" stroke-dasharray="6 4"/>
-        </svg>
+        <div style="width:1px;height:36px;background:rgba(255,255,255,0.15)"></div>
+        <div class="h-stat">
+          <div class="h-stat-num">Live</div>
+          <div class="h-stat-label">Maps Data</div>
+        </div>
+        <div style="width:1px;height:36px;background:rgba(255,255,255,0.15)"></div>
+        <div class="h-stat">
+          <div class="h-stat-num">Real</div>
+          <div class="h-stat-label">Hotel Prices</div>
+        </div>
       </div>
     </div>
-  </section>
 
-  <!-- FEATURES -->
-  <section class="features" id="features">
-    <div class="section-label">What It Does</div>
-    <h2 class="section-title">Engineered for Smart Travel</h2>
+    <div class="hero-visual fade-up fade-up-2">
+      <div class="trip-preview-card">
+        <div class="tpc-header">
+          <div class="tpc-dest">Jaipur, Rajasthan</div>
+          <div class="tpc-days">4 Days</div>
+        </div>
+        <div class="tpc-agents">
+          <div class="tpc-agents-label">Agent Pipeline</div>
+          <div class="agent-pills">
+            <div class="agent-pill done"><i data-lucide="user"></i> User</div>
+            <div class="agent-pill done"><i data-lucide="wallet"></i> Budget</div>
+            <div class="agent-pill done"><i data-lucide="sofa"></i> Comfort</div>
+            <div class="agent-pill active"><i data-lucide="party-popper"></i> Experience</div>
+            <div class="agent-pill"><i data-lucide="handshake"></i> Negotiate</div>
+          </div>
+        </div>
+        <div class="tpc-divider"></div>
+        <div class="tpc-result-row">
+          <span class="tpc-result-label"><i data-lucide="building-2"></i> Hotel</span>
+          <span class="tpc-result-val">The Lalit Jaipur</span>
+        </div>
+        <div class="tpc-result-row">
+          <span class="tpc-result-label"><i data-lucide="map-pin"></i> Attractions</span>
+          <span class="tpc-result-val">6 Places</span>
+        </div>
+        <div class="tpc-result-row">
+          <span class="tpc-result-label"><i data-lucide="car-taxi-front"></i> Transport</span>
+          <span class="tpc-result-val">Walk + Cab</span>
+        </div>
+        <div class="tpc-total">
+          <span class="tpc-total-label">Total Estimated Cost</span>
+          <span class="tpc-total-val">₹45,000</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features-section" id="features">
+  <div style="max-width:1200px;margin:0 auto">
+    <div class="section-header">
+      <div class="section-eyebrow">What It Does</div>
+      <h2 class="section-title">Built for Smart Travel</h2>
+      <p class="section-subtitle">Not just an AI chatbot — a full multi-agent reasoning system that thinks like a travel expert team.</p>
+    </div>
     <div class="features-grid">
-      <div class="feature-card fc-large">
-        <div class="fc-icon">🧠</div>
-        <h3>Multi-Agent AI Planning</h3>
-        <p>5 specialized agents collaborate: budget, comfort, experience, negotiation, and user profiling — all coordinated by a ManagerAgent.</p>
-        <div class="fc-tag">Core Architecture</div>
+      <div class="feature-card">
+        <div class="fc-icon-wrap fc-icon-blue"><i data-lucide="brain"></i></div>
+        <h3>Multi-Agent Architecture</h3>
+        <p>5 specialized agents each with a distinct role — Budget, Comfort, Experience, Negotiator, Manager — coordinated by a ManagerAgent pipeline.</p>
       </div>
       <div class="feature-card">
-        <div class="fc-icon">💰</div>
+        <div class="fc-icon-wrap fc-icon-teal"><i data-lucide="map"></i></div>
+        <h3>Google Maps Routing</h3>
+        <p>Real Distance Matrix API integration with nearest-neighbor ordering and automatic walk-vs-cab decisions for every journey leg.</p>
+      </div>
+      <div class="feature-card">
+        <div class="fc-icon-wrap fc-icon-amber"><i data-lucide="wallet"></i></div>
         <h3>Budget Optimization</h3>
-        <p>Hard constraint engine ensures your trip never exceeds limits, with real hotel pricing via SerpAPI.</p>
+        <p>Hard constraint engine enforces your budget ceiling. Live hotel pricing via SerpAPI. Cost breakdown across flights, hotel, transport, and food.</p>
       </div>
       <div class="feature-card">
-        <div class="fc-icon">🗺</div>
-        <h3>Smart Google Maps Routing</h3>
-        <p>Nearest-neighbor ordering, walking vs cab decisions, live distance matrix from Google Maps API.</p>
+        <div class="fc-icon-wrap fc-icon-blue"><i data-lucide="zap"></i></div>
+        <h3>Parallel Execution</h3>
+        <p>Budget, Comfort, and Experience agents run simultaneously using ThreadPoolExecutor — reducing processing time by ~60% vs sequential.</p>
       </div>
       <div class="feature-card">
-        <div class="fc-icon">⚡</div>
-        <h3>Fast AI Decisions</h3>
-        <p>Gemini 2.5 Flash powers all reasoning. Optimized itineraries with daily time budgeting.</p>
+        <div class="fc-icon-wrap fc-icon-teal"><i data-lucide="lock"></i></div>
+        <h3>Secure Authentication</h3>
+        <p>bcrypt password hashing, JWT tokens, httponly cookies. Your account and trips are fully persisted in SQLite via SQLAlchemy ORM.</p>
       </div>
-      <div class="feature-card fc-wide">
-        <div class="fc-icon">🧬</div>
-        <h3>User Memory & Personalization</h3>
-        <p>Profiles persist across sessions. Your constraints — vegetarian, elderly travel, low walking — are remembered and applied.</p>
-        <div class="fc-tag">Persistent Memory</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- HOW IT WORKS -->
-  <section class="how" id="how">
-    <div class="section-label">Architecture</div>
-    <h2 class="section-title">How It Works</h2>
-    <div class="flow-container">
-      <div class="flow-step">
-        <div class="flow-num">01</div>
-        <div class="flow-content">
-          <h4>Input Preferences</h4>
-          <p>Describe your trip: destination, days, budget, walking tolerance, food preferences</p>
-        </div>
-      </div>
-      <div class="flow-arrow">→</div>
-      <div class="flow-step">
-        <div class="flow-num">02</div>
-        <div class="flow-content">
-          <h4>Agent Team Activates</h4>
-          <p>Budget, Comfort, and Experience agents each generate independent plans using real API data</p>
-        </div>
-      </div>
-      <div class="flow-arrow">→</div>
-      <div class="flow-step">
-        <div class="flow-num">03</div>
-        <div class="flow-content">
-          <h4>Negotiation & Scoring</h4>
-          <p>NegotiatorAgent merges plans. ConstraintValidator checks hard limits. MapOptimizer orders routes.</p>
-        </div>
-      </div>
-      <div class="flow-arrow">→</div>
-      <div class="flow-step">
-        <div class="flow-num">04</div>
-        <div class="flow-content">
-          <h4>Optimized Trip</h4>
-          <p>Full itinerary with transport links, budget breakdown, daily schedule, and AI insights</p>
-        </div>
+      <div class="feature-card">
+        <div class="fc-icon-wrap fc-icon-amber"><i data-lucide="dna"></i></div>
+        <h3>User Memory</h3>
+        <p>UserAgent extracts and stores your constraints — walking preference, dietary needs, travel companions — and applies them automatically.</p>
       </div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- CTA -->
-  <section class="cta-section">
-    <div class="cta-bg">
-      <div class="orb orb-cta-1"></div>
-      <div class="orb orb-cta-2"></div>
+<!-- HOW IT WORKS -->
+<section class="how-section" id="how">
+  <div style="max-width:1200px;margin:0 auto">
+    <div class="section-header" style="text-align:center">
+      <div class="section-eyebrow">Architecture</div>
+      <h2 class="section-title">How It Works</h2>
     </div>
-    <div class="cta-content">
-      <h2>Ready to plan smarter?</h2>
-      <p>Let five AI agents collaborate on your perfect trip.</p>
-      <a href="/login" class="btn-primary btn-large">Start Your Trip →</a>
+    <div class="how-steps">
+      <div class="how-step">
+        <div class="how-step-num">1</div>
+        <h4>Input Preferences</h4>
+        <p>Describe your trip — destination, days, budget, walking tolerance, food preferences, travel companions.</p>
+      </div>
+      <div class="how-step">
+        <div class="how-step-num">2</div>
+        <h4>Agents Activate</h4>
+        <p>Budget, Comfort, and Experience agents run in parallel, each generating an independent plan using real API data.</p>
+      </div>
+      <div class="how-step">
+        <div class="how-step-num">3</div>
+        <h4>Negotiate & Optimize</h4>
+        <p>NegotiatorAgent merges the three plans. MapsOptimizer orders the route. ConstraintValidator enforces hard limits.</p>
+      </div>
+      <div class="how-step">
+        <div class="how-step-num">4</div>
+        <h4>Your Perfect Trip</h4>
+        <p>Full itinerary with day-by-day schedule, transport links, budget breakdown, and AI reasoning — saved to your account.</p>
+      </div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <footer class="footer">
-    <span class="nav-logo">✦</span>
-    <span>TravelMind AI — Built with Gemini 2.5 Flash &amp; Google Maps</span>
-    <span class="footer-author">by Sanjoli Gupta</span>
-  </footer>
+<!-- CTA -->
+<section class="cta-section">
+  <h2>Ready to plan smarter?</h2>
+  <p>Let five AI agents collaborate on your perfect trip.</p>
+  <a href="/login" class="btn-hero-primary">Start Your Trip <i data-lucide="arrow-right"></i></a>
+</section>
 
+<footer class="landing-footer">
+  <div style="display:flex;align-items:center;gap:0.5rem">
+    <div class="brand-mark" style="width:24px;height:24px;font-size:0.7rem"><i data-lucide="compass"></i></div>
+    <span>TravelMind AI</span>
+  </div>
+  <span>Built with Gemini 2.5 Flash · Google Maps API · FastAPI</span>
+  <span>by Sanjoli Gupta</span>
+</footer>
+
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    if (window.lucide) lucide.createIcons();
+  });
+</script>
 </body>
 </html>

@@ -4,368 +4,404 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>TravelMind AI — {{ destination }}</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/style.css"/>
 </head>
-<body class="app-page result-page">
+<body>
+<div class="app-shell result-page">
 
-  <div class="app-layout">
+  {% set active_page = 'trips' %}
+  {% include 'sidebar.html' %}
 
-    <!-- SIDEBAR -->
-    <aside class="sidebar">
-      <div class="sidebar-brand">
-        <span class="nav-logo">✦</span>
-        <span class="nav-name">TravelMind</span>
-      </div>
-      <nav class="sidebar-nav">
-        <a href="/dashboard" class="s-link">
-          <span class="s-icon">⊞</span> Home
-        </a>
-        <a href="/create" class="s-link">
-          <span class="s-icon">＋</span> Create Trip
-        </a>
-        <a href="/trips" class="s-link">
-          <span class="s-icon">📂</span> Saved Trips
-        </a>
-        <a href="/profile" class="s-link">
-          <span class="s-icon">◯</span> Profile
-        </a>
-      </nav>
-      <div class="sidebar-footer">
-        <a href="/logout" class="s-logout">↩ Logout</a>
-      </div>
-    </aside>
+  <div class="app-main">
 
-    <!-- MAIN RESULT AREA -->
-    <main class="app-main result-main">
-
-      <!-- TRIP HEADER -->
-      <div class="trip-header">
-        <div class="trip-header-bg">
-          <div class="orb orb-trip-1"></div>
-          <div class="orb orb-trip-2"></div>
+    <!-- TRIP HERO -->
+    <div class="trip-hero">
+      <div class="trip-hero-inner">
+        <div class="trip-breadcrumb">
+          <a href="/dashboard">Home</a> / <a href="/trips">Trips</a> / {{ destination }}
         </div>
-        <div class="trip-header-content">
-          <div class="trip-crumb"><a href="/dashboard">Home</a> → <a href="/trips">Trips</a> → {{ destination }}</div>
-          <h1 class="trip-title">{{ destination }}</h1>
-          <div class="trip-meta-row">
-            <span class="trip-meta-pill">{{ days_count }} Days</span>
-            <span class="trip-meta-pill">🏨 {{ hotel }}</span>
-            <span class="trip-meta-pill cost-pill">₹{{ cost }}</span>
-          </div>
+        <div class="trip-hero-title">{{ destination }}</div>
+        <div class="trip-hero-meta">
+          <span class="trip-hero-pill"><i data-lucide="calendar"></i> {{ days_count }} Days</span>
+          <span class="trip-hero-pill"><i data-lucide="building-2"></i> {{ hotel }}</span>
+          <span class="trip-hero-pill cost"><i data-lucide="wallet"></i> ₹{{ "{:,.0f}".format(cost) if cost else 'N/A' }}</span>
+          <span class="trip-hero-pill"><i data-lucide="map-pin"></i> {{ attractions | length }} Attractions</span>
         </div>
       </div>
+    </div>
 
-      <!-- SUMMARY CARDS -->
-      <div class="summary-grid">
-        <div class="sum-card">
-          <div class="sum-icon">📍</div>
-          <div class="sum-body">
-            <div class="sum-value">{{ attractions | length }}</div>
-            <div class="sum-label">Attractions</div>
-          </div>
-        </div>
-        <div class="sum-card">
-          <div class="sum-icon">📅</div>
-          <div class="sum-body">
-            <div class="sum-value">{{ days_count }}</div>
-            <div class="sum-label">Days Planned</div>
-          </div>
-        </div>
-        <div class="sum-card">
-          <div class="sum-icon">💰</div>
-          <div class="sum-body">
-            <div class="sum-value">₹{{ cost }}</div>
-            <div class="sum-label">Total Budget</div>
-          </div>
-        </div>
-        <div class="sum-card">
-          <div class="sum-icon">🛏</div>
-          <div class="sum-body">
-            <div class="sum-value truncate">{{ hotel }}</div>
-            <div class="sum-label">Hotel</div>
-          </div>
-        </div>
-        <div class="sum-card">
-          <div class="sum-icon">🚕</div>
-          <div class="sum-body">
-            <div class="sum-value">{{ transport | length }}</div>
-            <div class="sum-label">Route Legs</div>
-          </div>
+    <!-- SUMMARY STRIP -->
+    <div class="summary-strip">
+      <div class="sum-item">
+        <div class="sum-emoji"><i data-lucide="map-pin"></i></div>
+        <div>
+          <div class="sum-val">{{ attractions | length }}</div>
+          <div class="sum-label">Attractions</div>
         </div>
       </div>
+      <div class="sum-item">
+        <div class="sum-emoji"><i data-lucide="calendar"></i></div>
+        <div>
+          <div class="sum-val">{{ days_count }}</div>
+          <div class="sum-label">Days</div>
+        </div>
+      </div>
+      <div class="sum-item">
+        <div class="sum-emoji"><i data-lucide="wallet"></i></div>
+        <div>
+          <div class="sum-val">₹{{ "{:,.0f}".format(cost) if cost else 'N/A' }}</div>
+          <div class="sum-label">Total Cost</div>
+        </div>
+      </div>
+      <div class="sum-item">
+        <div class="sum-emoji"><i data-lucide="building-2"></i></div>
+        <div>
+          <div class="sum-val truncate" style="max-width:140px">{{ hotel }}</div>
+          <div class="sum-label">Hotel</div>
+        </div>
+      </div>
+      <div class="sum-item">
+        <div class="sum-emoji"><i data-lucide="car-taxi-front"></i></div>
+        <div>
+          <div class="sum-val">{{ transport | length }}</div>
+          <div class="sum-label">Route Legs</div>
+        </div>
+      </div>
+    </div>
 
-      <!-- TABS -->
-      <div class="tabs-container">
-        <div class="tabs-nav">
-          <button class="tab-btn active" onclick="switchTab('overview')">Overview</button>
-          <button class="tab-btn" onclick="switchTab('itinerary')">Itinerary</button>
-          <button class="tab-btn" onclick="switchTab('transport')">Transport</button>
-          <button class="tab-btn" onclick="switchTab('budget')">Budget</button>
-          <button class="tab-btn" onclick="switchTab('insights')">AI Insights</button>
+    <!-- TABS NAV -->
+    <div class="tabs-bar" id="tabsBar">
+      <button class="tab-btn active" onclick="switchTab('overview', this)">Overview</button>
+      <button class="tab-btn" onclick="switchTab('itinerary', this)">Itinerary</button>
+      <button class="tab-btn" onclick="switchTab('transport', this)">Transport</button>
+      <button class="tab-btn" onclick="switchTab('budget', this)">Budget</button>
+      <button class="tab-btn" onclick="switchTab('insights', this)">AI Insights</button>
+    </div>
+    <div id="tabsWrapper">
+
+    <!-- ═══════════════════════════════════════════
+         TAB 1 — OVERVIEW
+    ══════════════════════════════════════════════ -->
+    <div class="tab-content active" id="tab-overview">
+      <div class="overview-grid">
+
+        <div class="ov-card">
+          <h3>Trip Summary</h3>
+          <div class="ov-row"><span>Destination</span><strong>{{ destination }}</strong></div>
+          <div class="ov-row"><span>Hotel</span><strong>{{ hotel }}</strong></div>
+          <div class="ov-row"><span>Duration</span><strong>{{ days_count }} Days</strong></div>
+          <div class="ov-row"><span>Total Cost</span><strong>₹{{ "{:,.0f}".format(cost) if cost else 'N/A' }}</strong></div>
+          <div class="ov-row"><span>Places</span><strong>{{ attractions | length }} Attractions</strong></div>
+          <div class="ov-row"><span>Route Legs</span><strong>{{ transport | length }}</strong></div>
         </div>
 
-        <!-- OVERVIEW TAB -->
-        <div class="tab-panel active" id="tab-overview">
-          <div class="overview-grid">
-            <div class="ov-card">
-              <h3>Trip Summary</h3>
-              <div class="ov-row"><span>Destination</span><strong>{{ destination }}</strong></div>
-              <div class="ov-row"><span>Hotel</span><strong>{{ hotel }}</strong></div>
-              <div class="ov-row"><span>Duration</span><strong>{{ days_count }} Days</strong></div>
-              <div class="ov-row"><span>Total Cost</span><strong>₹{{ cost }}</strong></div>
-              <div class="ov-row"><span>Attractions</span><strong>{{ attractions | length }} Places</strong></div>
-            </div>
-
-            <div class="ov-card">
-              <h3>Your Constraints</h3>
-              {% if constraints %}
-                {% if constraints is mapping %}
-                  {% for key, val in constraints.items() %}
-                    <div class="ov-row"><span>{{ key | replace('_', ' ') | title }}</span><strong>{{ val }}</strong></div>
-                  {% endfor %}
-                {% else %}
-                  <p class="ov-text">{{ constraints }}</p>
-                {% endif %}
-              {% else %}
-                <p class="ov-text">No specific constraints applied.</p>
-              {% endif %}
-            </div>
-
-            <div class="ov-card ov-card-wide">
-              <h3>All Attractions</h3>
-              <div class="attractions-list">
-                {% for place in attractions %}
-                <div class="attraction-chip">
-                  <span class="att-num">{{ loop.index }}</span>
-                  {{ place }}
+        <div class="ov-card">
+          <h3>Your Preferences</h3>
+          {% if constraints and constraints is mapping %}
+            {% set ns = namespace(found=false) %}
+            {% for k, v in constraints.items() %}
+              {% set vs = v | string | lower %}
+              {% if vs not in ['none','null','false','','[]','{}'] and k != 'raw' %}
+                {% set ns.found = true %}
+                <div class="ov-row">
+                  <span>{{ k | replace('_', ' ') | title }}</span>
+                  <strong>{{ v }}</strong>
                 </div>
-                {% endfor %}
-              </div>
+              {% endif %}
+            {% endfor %}
+            {% if not ns.found %}
+              <p class="pref-note">Try adding specific preferences like budget, vegetarian, low walking next time.</p>
+            {% endif %}
+          {% else %}
+            <p class="pref-note">No specific constraints applied.</p>
+          {% endif %}
+        </div>
+
+        <div class="ov-card ov-card-wide">
+          <h3>All Attractions</h3>
+          <div class="att-grid">
+            {% for place in attractions %}
+            <div class="att-chip">
+              <span class="att-num">{{ loop.index }}</span>
+              {{ place }}
             </div>
+            {% endfor %}
           </div>
         </div>
 
-        <!-- ITINERARY TAB -->
-        <div class="tab-panel" id="tab-itinerary">
-          {% if daily_plan %}
-            {% for day in daily_plan %}
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         TAB 2 — ITINERARY
+    ══════════════════════════════════════════════ -->
+    <div class="tab-content" id="tab-itinerary">
+      {% if daily_plan %}
+        {% for day in daily_plan %}
+        <div class="day-block">
+          <div class="day-label">
+            <span class="day-badge">Day {{ loop.index }}</span>
+            <span class="day-count">{{ day | length }} place{{ 's' if day|length != 1 }}</span>
+          </div>
+          <div class="place-list">
+            {% for item in day %}
+            <div class="place-item">
+              <div class="place-num">{{ loop.index }}</div>
+              <div class="place-info">
+                <div class="place-name">{{ item.place }}</div>
+                <div class="place-meta">
+                  <span><i data-lucide="car"></i> {{ item.travel_time }}</span>
+                  <span><i data-lucide="ruler"></i> {{ item.distance }}</span>
+                  <span><i data-lucide="clock"></i> {{ item.visit_time }}</span>
+                </div>
+              </div>
+              <a href="https://www.google.com/maps/search/?api=1&query={{ item.place | urlencode }},{{ destination | urlencode }}"
+                 target="_blank" class="maps-link">Maps <i data-lucide="arrow-up-right"></i></a>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty-state">
+          <div class="empty-icon"><i data-lucide="calendar"></i></div>
+          <h3>No itinerary data</h3>
+          <p>Daily plan could not be generated. Check your Maps API key.</p>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         TAB 3 — TRANSPORT
+    ══════════════════════════════════════════════ -->
+    <div class="tab-content" id="tab-transport">
+      {% if transport %}
+        {% set ns = namespace(day=None) %}
+        {% for leg in transport %}
+          {% if leg.day != ns.day %}
+            {% if not loop.first %}</div>{% endif %}
+            {% set ns.day = leg.day %}
             <div class="day-block">
-              <div class="day-header">
-                <span class="day-badge">Day {{ loop.index }}</span>
-                <span class="day-count">{{ day | length }} places</span>
+              <div class="day-label">
+                <span class="day-badge">Day {{ leg.day }}</span>
               </div>
-              <div class="day-places">
-                {% for item in day %}
-                <div class="place-card">
-                  <div class="place-icon">📍</div>
-                  <div class="place-body">
-                    <div class="place-name">{{ item.place }}</div>
-                    <div class="place-meta">
-                      <span>🚗 {{ item.travel_time }}</span>
-                      <span>📏 {{ item.distance }}</span>
-                      <span>⏱ {{ item.visit_time }}</span>
-                    </div>
-                  </div>
-                  <a href="https://www.google.com/maps/search/?api=1&query={{ item.place | urlencode }}" target="_blank" class="place-maps-btn">Maps ↗</a>
-                </div>
-                {% endfor %}
+              <div class="transport-list">
+          {% endif %}
+          <div class="transport-item">
+            <div class="transport-route">
+              <span class="t-place">{{ leg.from }}</span>
+              <div class="t-connector">
+                <div class="t-line-seg"></div>
+                <span class="t-mode {{ 't-mode-walk' if leg.mode == 'WALK' else 't-mode-cab' if leg.mode == 'CAB' else 't-mode-unknown' }}">
+                  {% if leg.mode == 'WALK' %}<i data-lucide="footprints"></i> Walk
+                  {% elif leg.mode == 'CAB' %}<i data-lucide="car-taxi-front"></i> Cab
+                  {% else %}<i data-lucide="help-circle"></i> {{ leg.mode }}{% endif %}
+                </span>
+                <div class="t-line-seg"></div>
               </div>
+              <span class="t-place">{{ leg.to }}</span>
+            </div>
+            <div class="transport-details">
+              {% if leg.distance %}<span><i data-lucide="ruler"></i> {{ leg.distance }}</span>{% endif %}
+              {% if leg.time %}<span><i data-lucide="clock"></i> {{ leg.time }}</span>{% endif %}
+            </div>
+            {% if leg.reason %}
+            <div class="transport-reason"><i data-lucide="lightbulb"></i> {{ leg.reason }}</div>
+            {% endif %}
+            {% if leg.link %}
+            <a href="{{ leg.link }}" target="_blank" class="transport-maps-btn">
+              Open in Google Maps <i data-lucide="arrow-up-right"></i>
+            </a>
+            {% endif %}
+          </div>
+          {% if loop.last %}</div></div>{% endif %}
+        {% endfor %}
+      {% else %}
+        <div class="empty-state">
+          <div class="empty-icon"><i data-lucide="car-taxi-front"></i></div>
+          <h3>No transport data</h3>
+          <p>Transport legs could not be generated. Check your Maps API key.</p>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         TAB 4 — BUDGET
+    ══════════════════════════════════════════════ -->
+    <div class="tab-content" id="tab-budget">
+      <div class="budget-layout">
+
+        <div class="budget-card">
+          <h3>Cost Breakdown</h3>
+          {% if cost_breakdown %}
+            {% set icons = {'flight': 'plane', 'hotel': 'building-2', 'local_transport': 'car-taxi-front', 'food': 'utensils'} %}
+            {% set bars  = {'flight': 'bar-blue', 'hotel': 'bar-teal', 'local_transport': 'bar-amber', 'food': 'bar-rose'} %}
+            {% for cat, amt in cost_breakdown.items() %}
+            <div class="budget-item">
+              <div class="budget-item-icon"><i data-lucide="{{ icons.get(cat, 'credit-card') }}"></i></div>
+              <div class="budget-item-label">{{ cat | replace('_', ' ') | title }}</div>
+              <div class="budget-bar-track">
+                <div class="budget-bar-fill {{ bars.get(cat, 'bar-blue') }}"
+                     style="width:{{ ((amt / cost) * 100) | round if cost else 0 }}%"></div>
+              </div>
+              <div class="budget-item-amt">₹{{ "{:,.0f}".format(amt) }}</div>
             </div>
             {% endfor %}
-          {% else %}
-            <div class="empty-state"><p>Daily plan not available.</p></div>
           {% endif %}
+          <div class="budget-total-row">
+            <span class="budget-total-label">Total Estimated Cost</span>
+            <span class="budget-total-amt">₹{{ "{:,.0f}".format(cost) if cost else 'N/A' }}</span>
+          </div>
+          <p style="font-size:0.75rem;color:var(--gray-400);margin-top:0.8rem">
+            * Flight costs are estimated. Hotel prices sourced from SerpAPI.
+          </p>
         </div>
 
-        <!-- TRANSPORT TAB -->
-        <div class="tab-panel" id="tab-transport">
-          {% if transport %}
-            {% for leg in transport %}
-            <div class="transport-card">
-              <div class="transport-route">
-                <span class="t-from">{{ leg.from }}</span>
-                <div class="t-arrow-wrap">
-                  <span class="t-mode-badge {% if leg.mode == 'WALK' %}walk{% else %}cab{% endif %}">
-                    {% if leg.mode == 'WALK' %}🚶 WALK{% else %}🚕 CAB{% endif %}
-                  </span>
-                  <div class="t-line"></div>
-                </div>
-                <span class="t-to">{{ leg.to }}</span>
-              </div>
-              <div class="transport-meta">
-                {% if leg.distance %}<span>📏 {{ leg.distance }}</span>{% endif %}
-                {% if leg.time %}<span>⏱ {{ leg.time }}</span>{% endif %}
-              </div>
-              {% if leg.reason %}
-              <div class="transport-reason">💡 {{ leg.reason }}</div>
-              {% endif %}
-              {% if leg.link %}
-              <a href="{{ leg.link }}" target="_blank" class="transport-link">Open in Google Maps ↗</a>
-              {% endif %}
+        <div class="budget-chart-card">
+          <h4>Distribution</h4>
+          <div class="donut-wrap">
+            <canvas id="donutChart" width="180" height="180"></canvas>
+            <div class="donut-center">
+              <div class="donut-total">₹{{ "{:,.0f}".format(cost) if cost else '0' }}</div>
+              <div class="donut-label">Total</div>
             </div>
-            {% endfor %}
-          {% else %}
-            <div class="empty-state"><p>Transport data not available.</p></div>
-          {% endif %}
-        </div>
-
-        <!-- BUDGET TAB -->
-        <div class="tab-panel" id="tab-budget">
-          <div class="budget-container">
-            <div class="budget-breakdown">
-              <h3>Cost Breakdown</h3>
-              {% if cost_breakdown %}
-                {% for category, amount in cost_breakdown.items() %}
-                <div class="budget-row">
-                  <div class="budget-category">
-                    <span class="budget-icon">
-                      {% if category == 'flight' %}✈{% elif category == 'hotel' %}🏨{% elif category == 'local_transport' %}🚕{% elif category == 'food' %}🍽{% else %}💳{% endif %}
-                    </span>
-                    {{ category | replace('_', ' ') | title }}
-                  </div>
-                  <div class="budget-bar-wrap">
-                    <div class="budget-bar-fill" style="width: {{ (amount / cost * 100) | round }}%"></div>
-                  </div>
-                  <div class="budget-amount">₹{{ amount }}</div>
-                </div>
-                {% endfor %}
-              {% endif %}
-              <div class="budget-total">
-                <span>Total</span>
-                <span class="budget-total-val">₹{{ cost }}</span>
+          </div>
+          <div class="budget-legend">
+            {% if cost_breakdown %}
+              {% set colors = ['#2563eb', '#0d9488', '#f59e0b', '#e11d48'] %}
+              {% for cat, amt in cost_breakdown.items() %}
+              <div class="legend-item">
+                <div class="legend-dot" style="background:{{ colors[loop.index0 % 4] }}"></div>
+                <span class="legend-name">{{ cat | replace('_', ' ') | title }}</span>
+                <span class="legend-val">₹{{ "{:,.0f}".format(amt) }}</span>
               </div>
-            </div>
-
-            <div class="budget-donut-wrap">
-              <canvas id="budgetChart" width="220" height="220"></canvas>
-              <div class="budget-chart-center">
-                <div class="budget-chart-total">₹{{ cost }}</div>
-                <div class="budget-chart-label">Total</div>
-              </div>
-            </div>
+              {% endfor %}
+            {% endif %}
           </div>
         </div>
 
-        <!-- AI INSIGHTS TAB -->
-        <div class="tab-panel" id="tab-insights">
-          <div class="insights-hero">
-            <div class="insights-badge">🧠 AI Reasoning</div>
-            <h2>What the Agents Decided</h2>
-          </div>
-          <div class="insights-grid">
-            <div class="insight-card">
-              <span class="insight-check">✔</span>
-              <div>
-                <strong>Route Optimized</strong>
-                <p>MapsOptimizer applied nearest-neighbor ordering to minimize total travel time.</p>
-              </div>
-            </div>
-            <div class="insight-card">
-              <span class="insight-check">✔</span>
-              <div>
-                <strong>Central Hotel Selected</strong>
-                <p>BudgetAgent chose a hotel minimizing cab costs while staying within budget.</p>
-              </div>
-            </div>
-            <div class="insight-card">
-              <span class="insight-check">✔</span>
-              <div>
-                <strong>Daily Load Balanced</strong>
-                <p>DailyTimeEngine capped each day at 8 hours of activity for sustainable pacing.</p>
-              </div>
-            </div>
-            <div class="insight-card">
-              <span class="insight-check">✔</span>
-              <div>
-                <strong>Walking Minimized</strong>
-                <p>TransportEngine auto-detected legs over 800m and switched to cab recommendation.</p>
-              </div>
-            </div>
-            <div class="insight-card">
-              <span class="insight-check">✔</span>
-              <div>
-                <strong>Constraints Applied</strong>
-                <p>ConstraintValidator checked every plan against your preferences before final output.</p>
-              </div>
-            </div>
-            <div class="insight-card">
-              <span class="insight-check">✔</span>
-              <div>
-                <strong>Agent Negotiation Complete</strong>
-                <p>NegotiatorAgent merged Budget, Comfort, and Experience plans into optimal itinerary.</p>
-              </div>
-            </div>
-          </div>
+      </div>
+    </div>
 
-          <div class="reasoning-toggle">
-            <button class="btn-ghost" onclick="toggleReasoning(this)">Show Full AI Reasoning ↓</button>
-            <div class="reasoning-raw" id="reasoningRaw" style="display:none">
-              <pre>{{ ai_reasoning }}</pre>
-            </div>
+    <!-- ═══════════════════════════════════════════
+         TAB 5 — AI INSIGHTS
+    ══════════════════════════════════════════════ -->
+    <div class="tab-content" id="tab-insights">
+      <div class="insights-header">
+        <span class="badge badge-blue" style="margin-bottom:0.7rem"><i data-lucide="brain"></i> AI Reasoning</span>
+        <h2>What the Agents Decided</h2>
+        <p>Structured summary of every optimization decision made across the pipeline.</p>
+      </div>
+
+      <div class="insights-grid">
+        {% for card in insights %}
+        <div class="insight-card">
+          <div class="insight-check"><i data-lucide="check"></i></div>
+          <div>
+            <strong>{{ card.title }}</strong>
+            <p>{{ card.text }}</p>
           </div>
         </div>
+        {% endfor %}
+      </div>
 
-      </div><!-- /tabs-container -->
+      <button class="reasoning-toggle-btn" onclick="toggleReasoning(this)">
+        <span>Show Full AI Reasoning</span>
+        <span><i data-lucide="chevron-down"></i></span>
+      </button>
+      <div class="reasoning-raw" id="reasoningRaw">
+        <div id="reasoningContent"></div>
+      </div>
+    </div>
 
-    </main>
-  </div>
+    </div><!-- /tabsWrapper -->
+  </div><!-- /app-main -->
+</div><!-- /app-shell -->
 
-  <script>
-    // Tab switching
-    function switchTab(name) {
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-      event.target.classList.add('active');
-      document.getElementById('tab-' + name).classList.add('active');
-    }
+<script>
+  // Tab switching
+  function switchTab(name, btn) {
+    // Scope to tabsBar and tabsWrapper only
+    document.querySelectorAll('#tabsBar .tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('#tabsWrapper .tab-content').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    const target = document.getElementById('tab-' + name);
+    if (target) target.classList.add('active');
+  }
 
-    // Toggle reasoning
-    function toggleReasoning(btn) {
-      const raw = document.getElementById('reasoningRaw');
-      if (raw.style.display === 'none') {
-        raw.style.display = 'block';
-        btn.textContent = 'Hide Full AI Reasoning ↑';
-      } else {
-        raw.style.display = 'none';
-        btn.textContent = 'Show Full AI Reasoning ↓';
-      }
-    }
+  // Reasoning toggle
+  function toggleReasoning(btn) {
+    const raw = document.getElementById('reasoningRaw');
+    const isOpen = raw.style.display === 'block';
+    raw.style.display = isOpen ? 'none' : 'block';
+    btn.querySelector('span:first-child').textContent = isOpen ? 'Show Full AI Reasoning' : 'Hide Full AI Reasoning';
+    const icon = btn.querySelector('span:last-child i');
+    if (icon) icon.style.transform = isOpen ? '' : 'rotate(180deg)';
+  }
 
-    // Budget donut chart
-    document.addEventListener('DOMContentLoaded', () => {
-      const canvas = document.getElementById('budgetChart');
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
+  // Markdown renderer for AI reasoning
+  function renderMarkdown(text) {
+    if (!text) return '<p style="color:var(--gray-400)">No AI reasoning available.</p>';
+    return text
+      // Headers
+      .replace(/^### (.+)$/gm, '<h4 style="color:var(--navy);font-size:0.95rem;font-weight:700;margin:1.2rem 0 0.4rem">$1</h4>')
+      .replace(/^## (.+)$/gm,  '<h3 style="color:var(--navy);font-size:1.05rem;font-weight:700;margin:1.5rem 0 0.5rem">$1</h3>')
+      .replace(/^# (.+)$/gm,   '<h2 style="color:var(--navy);font-size:1.2rem;font-weight:700;margin:1.5rem 0 0.5rem">$1</h2>')
+      // Bold
+      .replace(/\*\*(.+?)\*\*/g, '<strong style="color:var(--navy)">$1</strong>')
+      // Italic
+      .replace(/\*(.+?)\*/g, '<em>$1</em>')
+      // Bullet points
+      .replace(/^\* (.+)$/gm, '<li style="margin:0.3rem 0;padding-left:0.3rem">$1</li>')
+      .replace(/^- (.+)$/gm,  '<li style="margin:0.3rem 0;padding-left:0.3rem">$1</li>')
+      // Wrap consecutive <li> in <ul>
+      .replace(/((<li[^>]*>.*?<\/li>\n?)+)/gs, '<ul style="padding-left:1.2rem;margin:0.4rem 0">$1</ul>')
+      // Horizontal rules
+      .replace(/^---$/gm, '<hr style="border:none;border-top:1px solid var(--gray-200);margin:1rem 0"/>')
+      // Paragraphs — wrap non-tagged lines
+      .replace(/^(?!<[hul]|<li|<hr)(.+)$/gm, '<p style="margin:0.4rem 0;line-height:1.7;color:var(--gray-700)">$1</p>')
+      // Clean up empty lines
+      .replace(/\n{3,}/g, '\n\n');
+  }
 
-      const breakdown = {{ cost_breakdown | tojson }};
-      const labels = Object.keys(breakdown).map(k => k.replace('_', ' '));
-      const values = Object.values(breakdown);
-      const colors = ['#f59e0b', '#10b981', '#6366f1', '#f43f5e', '#14b8a6'];
+  // Render AI reasoning on page load
+  const rawReasoning = {{ ai_reasoning | tojson }};
+  const reasoningEl = document.getElementById('reasoningContent');
+  if (reasoningEl && rawReasoning) {
+    reasoningEl.innerHTML = renderMarkdown(rawReasoning);
+  }
 
-      const total = values.reduce((a,b) => a+b, 0);
-      let startAngle = -Math.PI / 2;
-      const cx = 110, cy = 110, r = 90, ir = 55;
+  // Donut chart
+  window.addEventListener('load', () => {
+    const canvas = document.getElementById('donutChart');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const breakdown = {{ (cost_breakdown or {}) | tojson }};
+    const vals = Object.values(breakdown);
+    if (!vals.length) return;
+    const total = vals.reduce((a, b) => a + b, 0);
+    if (total === 0) return;
+    const colors = ['#2563eb', '#0d9488', '#f59e0b', '#e11d48'];
+    let angle = -Math.PI / 2;
+    const cx = 90, cy = 90, r = 75, ir = 48;
 
-      values.forEach((val, i) => {
-        const slice = (val / total) * 2 * Math.PI;
-        ctx.beginPath();
-        ctx.moveTo(cx, cy);
-        ctx.arc(cx, cy, r, startAngle, startAngle + slice);
-        ctx.closePath();
-        ctx.fillStyle = colors[i % colors.length];
-        ctx.fill();
-
-        // inner hole
-        ctx.beginPath();
-        ctx.arc(cx, cy, ir, 0, 2 * Math.PI);
-        ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--bg') || '#0d0d14';
-        ctx.fill();
-
-        startAngle += slice;
-      });
+    vals.forEach((v, i) => {
+      const slice = (v / total) * 2 * Math.PI;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.arc(cx, cy, r, angle, angle + slice);
+      ctx.closePath();
+      ctx.fillStyle = colors[i % colors.length];
+      ctx.fill();
+      angle += slice;
     });
-  </script>
+
+    // inner white hole
+    ctx.beginPath();
+    ctx.arc(cx, cy, ir, 0, 2 * Math.PI);
+    ctx.fillStyle = 'white';
+    ctx.fill();
+  });
+</script>
 </body>
 </html>

@@ -4,42 +4,48 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>TravelMind AI — Profile</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/style.css"/>
 </head>
-<body class="app-page">
-  <div class="app-layout">
-    <aside class="sidebar">
-      <div class="sidebar-brand">
-        <span class="nav-logo">✦</span>
-        <span class="nav-name">TravelMind</span>
+<body>
+<div class="app-shell">
+
+  {% set active_page = 'profile' %}
+  {% include 'sidebar.html' %}
+
+  <div class="app-main">
+    <div class="app-topbar">
+      <div>
+        <div class="topbar-title">Profile</div>
+        <div class="topbar-sub">Your account details</div>
       </div>
-      <nav class="sidebar-nav">
-        <a href="/dashboard" class="s-link"><span class="s-icon">⊞</span> Home</a>
-        <a href="/create" class="s-link"><span class="s-icon">＋</span> Create Trip</a>
-        <a href="/trips" class="s-link"><span class="s-icon">📂</span> Saved Trips</a>
-        <a href="/profile" class="s-link active"><span class="s-icon">◯</span> Profile</a>
-      </nav>
-      <div class="sidebar-footer">
-        <a href="/logout" class="s-logout">↩ Logout</a>
-      </div>
-    </aside>
-    <main class="app-main">
-      <h1 class="app-heading">Profile</h1>
-      <p class="app-subheading" style="margin-bottom:2rem">Your account &amp; preferences</p>
-      <div style="max-width:420px">
-        <div class="ov-card">
-          <h3>Account</h3>
+    </div>
+
+    <div class="app-content">
+      <div class="profile-layout">
+
+        <div class="profile-avatar-card">
+          <div class="profile-avatar-big">{{ username[0].upper() if username else 'U' }}</div>
+          <div class="profile-name">{{ username }}</div>
+          <div class="profile-email">{{ email }}</div>
+          <span class="badge badge-green" style="margin-top:0.5rem">Active Account</span>
+        </div>
+
+        <div class="profile-info-card">
+          <h3>Account Details</h3>
           <div class="ov-row"><span>Name</span><strong>{{ username }}</strong></div>
-          <div class="ov-row"><span>Memory</span><strong>Active</strong></div>
+          <div class="ov-row"><span>Email</span><strong>{{ email }}</strong></div>
+          <div class="ov-row"><span>Member Since</span><strong>{{ member_since }}</strong></div>
+          <div class="ov-row"><span>Auth Method</span><strong>JWT + bcrypt</strong></div>
           <div class="ov-row"><span>AI Model</span><strong>Gemini 2.5 Flash</strong></div>
+          <div class="ov-row"><span>Database</span><strong>SQLite (SQLAlchemy ORM)</strong></div>
+          <div style="margin-top:1.5rem">
+            <a href="/logout" class="btn btn-danger"><i data-lucide="log-out"></i> Sign Out</a>
+          </div>
         </div>
-        <div style="margin-top:1.5rem">
-          <a href="/logout" class="btn-ghost" style="color:#f43f5e;border-color:rgba(244,63,94,0.3)">↩ Logout</a>
-        </div>
+
       </div>
-    </main>
+    </div>
   </div>
+</div>
 </body>
 </html>

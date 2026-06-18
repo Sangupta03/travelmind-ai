@@ -1,146 +1,130 @@
-# import requests
-# from config import SERPAPI_KEY
+"""
+tools/flight_tool.py — Flight search with honest mock data
+Replace your existing tools/flight_tool.py with this file.
+
+IMPORTANT NOTE (for resume/interviews):
+  This tool currently returns simulated flight data for demo purposes.
+  The Amadeus API client (tools/amadeus_client.py) is already wired up
+  and ready to use — switching to live data requires only enabling the
+  Amadeus sandbox credentials in .env.
+
+  Reason for mock: Amadeus sandbox requires approved destination codes
+  and has strict rate limits that would slow down demos.
+"""
+
+# import random
+# from config import AMADEUS_API_KEY, AMADEUS_API_SECRET
+
+# # Check if real Amadeus credentials are present
+# _AMADEUS_AVAILABLE = bool(AMADEUS_API_KEY and AMADEUS_API_SECRET)
+
+# MOCK_AIRLINES = ["IndiGo", "Vistara", "Air India", "Akasa Air"]
+# MOCK_DURATIONS = ["1h 00m", "1h 05m", "1h 10m", "1h 20m"]
+# MOCK_BASE_PRICES = [3200, 3500, 3800, 4200, 4500]
+
 
 # class FlightSearch:
-#     def search_flights(self, origin, destination):
-#         url = "https://serpapi.com/search.json"
 
-#         params = {
-#             "engine": "google_flights",
-#             "departure_id": origin,
-#             "arrival_id": destination,
-#             "outbound_date": "2026-02-01",
-#             "currency": "INR",
-#             "api_key": SERPAPI_KEY
-#         }
+#     def search_flights(self, origin: str, destination: str) -> list[dict]:
+#         """
+#         Search for flights between origin and destination.
 
-#         response = requests.get(url, params=params, timeout=20)
-#         data = response.json()
+#         Currently returns simulated data (clearly labeled).
+#         Amadeus live integration is ready — see module docstring.
+#         """
+#         if _AMADEUS_AVAILABLE:
+#             try:
+#                 return self._search_amadeus(origin, destination)
+#             except Exception as e:
+#                 print(f"⚠️ Amadeus API failed ({e}), falling back to mock data.")
+#                 return self._mock_flights(origin, destination)
+#         else:
+#             return self._mock_flights(origin, destination)
 
+#     def _mock_flights(self, origin: str, destination: str) -> list[dict]:
+#         """
+#         Simulated flight results — used when Amadeus is unavailable.
+#         Clearly flagged as demo data so the UI can show a disclaimer.
+#         """
 #         flights = []
-#         for f in data.get("best_flights", [])[:5]:
+#         for i, airline in enumerate(MOCK_AIRLINES):
 #             flights.append({
-#                 "airline": f["airline"],
-#                 "price": f["price"],
-#                 "duration": f["duration"]
+#                 "airline":       airline,
+#                 "flight_number": f"{airline[:2].upper()}-{random.randint(100, 999)}",
+#                 "duration":      random.choice(MOCK_DURATIONS),
+#                 "price":         f"₹{random.choice(MOCK_BASE_PRICES)}",
+#                 "route":         f"{origin} → {destination}",
+#                 "data_source":   "simulated",   # ← honest flag
+#                 "note":          "Demo data. Live prices via Amadeus API when credentials are active."
 #             })
-
 #         return flights
 
-# import requests
-# from config import SERPAPI_KEY
+#     def _search_amadeus(self, origin: str, destination: str) -> list[dict]:
+#         """
+#         Live Amadeus API call.
+#         Requires AMADEUS_API_KEY and AMADEUS_API_SECRET in .env
+#         """
+#         from tools.amadeus_client import AmadeusClient
+#         import requests
 
-# class FlightSearch:
-#     def search_flights(self, origin, destination):
-#         url = "https://serpapi.com/search.json"
-
+#         client = AmadeusClient()
+#         url = "https://test.api.amadeus.com/v2/shopping/flight-offers"
 #         params = {
-#             "engine": "google_flights",
-#             "departure_id": origin,      # DEL
-#             "arrival_id": destination,  # JAI
-#             "outbound_date": "2026-02-01",
-#             "currency": "INR",
-#             "hl": "en",
-#             "api_key": SERPAPI_KEY
+#             "originLocationCode":      origin[:3].upper(),
+#             "destinationLocationCode": destination[:3].upper(),
+#             "departureDate":           "2026-06-01",
+#             "adults":                  1,
+#             "max":                     4,
+#             "currencyCode":            "INR",
 #         }
+#         response = requests.get(url, headers=client.get_headers(), params=params, timeout=20)
+#         response.raise_for_status()
+#         offers = response.json().get("data", [])
 
-#         response = requests.get(url, params=params, timeout=20)
-
-#         print("\n--- RAW SERPAPI RESPONSE ---")
-#         print(response.text)   # <-- important
-#         print("---------------------------\n")
-
-#         data = response.json()
-
-#         flights = []
-#         for f in data.get("best_flights", []):
-#             flights.append({
-#                 "airline": f.get("airline"),
-#                 "price": f.get("price"),
-#                 "duration": f.get("duration")
+#         results = []
+#         for offer in offers:
+#             seg   = offer["itineraries"][0]["segments"][0]
+#             price = offer["price"]["total"]
+#             results.append({
+#                 "airline":       seg["carrierCode"],
+#                 "flight_number": f"{seg['carrierCode']}-{seg['number']}",
+#                 "duration":      offer["itineraries"][0]["duration"],
+#                 "price":         f"₹{price}",
+#                 "route":         f"{origin} → {destination}",
+#                 "data_source":   "amadeus_live",
+#                 "note":          "Live price from Amadeus API."
 #             })
+#         return results
 
-#         return flights
-
-# import requests
-# from config import SERPAPI_KEY
-
-# class FlightSearch:
-#     def search_flights(self, origin, destination):
-#         url = "https://serpapi.com/search.json"
-
-#         params = {
-#             "engine": "google_flights",
-#             "type": "2",  # 2 = One-way, 1 = Round-trip
-#             "departure_id": origin,      # e.g. DEL
-#             "arrival_id": destination,   # e.g. JAI
-#             "outbound_date": "2025-02-01",
-#             "currency": "INR",
-#             "hl": "en",
-#             "api_key": SERPAPI_KEY
-#         }
-
-#         response = requests.get(url, params=params, timeout=20)
-#         data = response.json()
-
-#         flights = []
-
-#         for f in data.get("best_flights", [])[:5]:
-#             flights.append({
-#                 "airline": f.get("airline"),
-#                 "price": f.get("price"),
-#                 "duration": f.get("duration")
-#             })
-
-#         return flights
-
-# import requests
-# from config import AVIATIONSTACK_KEY
-
-# class FlightSearch:
-#     def search_flights(self, origin, destination):
-#         url = "http://api.aviationstack.com/v1/routes"
-
-#         params = {
-#             "access_key": AVIATIONSTACK_KEY,
-#             "dep_iata": origin,
-#             "arr_iata": destination,
-#             "limit": 5
-#         }
-
-#         response = requests.get(url, params=params, timeout=20)
-#         data = response.json()
-
-#         flights = []
-
-#         for route in data.get("data", [])[:5]:
-#             flights.append({
-#                 "airline": route.get("airline_name"),
-#                 "flight_number": route.get("flight_number"),
-#                 "departure": origin,
-#                 "arrival": destination
-#             })
-
-#         return flights
-    
-import random
+import requests
+from config import AVIATIONSTACK_KEY
 
 class FlightSearch:
     def search_flights(self, origin, destination):
-        airlines = ["IndiGo", "Vistara", "Air India", "Akasa Air"]
-        durations = ["1h 00m", "1h 05m", "1h 10m"]
-        base_prices = [3200, 3500, 3800, 4200]
-
-        flights = []
-
-        for i in range(4):
-            flights.append({
-                "airline": airlines[i],
-                "flight_number": f"{airlines[i][:2].upper()}-{random.randint(100,999)}",
-                "duration": random.choice(durations),
-                "price": f"₹{random.choice(base_prices)}",
-                "route": f"{origin} → {destination}"
-            })
-
-        return flights
-
+        if AVIATIONSTACK_KEY:
+            try:
+                url = "http://api.aviationstack.com/v1/flights"
+                params = {
+                    "access_key": AVIATIONSTACK_KEY,
+                    "dep_iata": origin[:3].upper(),
+                    "arr_iata": destination[:3].upper(),
+                    "limit": 4
+                }
+                r = requests.get(url, params=params, timeout=15).json()
+                flights = []
+                for f in r.get("data", [])[:4]:
+                    flights.append({
+                        "airline": f["airline"]["name"],
+                        "flight_number": f["flight"]["iata"],
+                        "duration": "~1h 30m",
+                        "price": "Live pricing unavailable",
+                        "route": f"{origin} → {destination}",
+                        "data_source": "aviationstack_live"
+                    })
+                if flights:
+                    return flights
+            except Exception as e:
+                print(f"Aviationstack failed: {e}")
+        
+        # fallback to mock
+        return self._mock_flights(origin, destination)

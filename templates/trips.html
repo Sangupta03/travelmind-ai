@@ -4,60 +4,60 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>TravelMind AI — Saved Trips</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/style.css"/>
 </head>
-<body class="app-page">
-  <div class="app-layout">
-    <aside class="sidebar">
-      <div class="sidebar-brand">
-        <span class="nav-logo">✦</span>
-        <span class="nav-name">TravelMind</span>
+<body>
+<div class="app-shell">
+
+  {% set active_page = 'trips' %}
+  {% include 'sidebar.html' %}
+
+  <div class="app-main">
+    <div class="app-topbar">
+      <div>
+        <div class="topbar-title">Saved Trips</div>
+        <div class="topbar-sub">All your AI-planned itineraries</div>
       </div>
-      <nav class="sidebar-nav">
-        <a href="/dashboard" class="s-link"><span class="s-icon">⊞</span> Home</a>
-        <a href="/create" class="s-link"><span class="s-icon">＋</span> Create Trip</a>
-        <a href="/trips" class="s-link active"><span class="s-icon">📂</span> Saved Trips</a>
-        <a href="/profile" class="s-link"><span class="s-icon">◯</span> Profile</a>
-      </nav>
-      <div class="sidebar-footer">
-        <a href="/logout" class="s-logout">↩ Logout</a>
-      </div>
-    </aside>
-    <main class="app-main">
-      <div class="app-topbar">
-        <div>
-          <h1 class="app-heading">Saved Trips</h1>
-          <p class="app-subheading">All your AI-planned itineraries</p>
-        </div>
-        <a href="/create" class="btn-primary">＋ New Trip</a>
-      </div>
-      <div class="trips-grid trips-grid-big">
-        {% if trips %}
-          {% for trip in trips %}
-          <a href="/result/{{ trip.id }}" class="trip-card trip-card-big">
-            <div class="tcb-header">
-              <div class="tcb-dest">{{ trip.destination }}</div>
-              <span class="tcb-days">{{ trip.days }} days</span>
+      <a href="/create" class="btn btn-primary"><i data-lucide="plus"></i> New Trip</a>
+    </div>
+
+    <div class="app-content">
+      {% if trips %}
+      <div class="saved-trips-grid">
+        {% for trip in trips %}
+        <div class="saved-trip-card-wrap">
+          <a href="/result/{{ trip.id }}" class="saved-trip-card">
+            <div class="stc-header">
+              <div class="stc-dest">{{ trip.destination }}</div>
+              <span class="badge badge-blue">{{ trip.days_count }} days</span>
             </div>
-            <div class="tcb-hotel">🏨 {{ trip.hotel }}</div>
-            <div class="tcb-cost">₹{{ trip.cost }}</div>
-            <div class="tcb-footer">
-              <span>{{ trip.date }}</span>
-              <span class="tcb-arrow">View Trip →</span>
+            <div class="stc-meta">
+              <span><i data-lucide="building-2"></i> {{ trip.hotel }}</span>
+              <span><i data-lucide="map-pin"></i> {{ trip.attractions | length }} attractions</span>
+            </div>
+            <div class="stc-cost">₹{{ "{:,.0f}".format(trip.estimated_cost) if trip.estimated_cost else 'N/A' }}</div>
+            <div class="stc-footer">
+              <span class="stc-date">{{ trip.created_at.strftime('%d %b %Y') if trip.created_at else '' }}</span>
+              <span class="stc-cta">View Trip <i data-lucide="arrow-right"></i></span>
             </div>
           </a>
-          {% endfor %}
-        {% else %}
-          <div class="empty-state" style="grid-column:1/-1">
-            <div class="empty-icon">✈</div>
-            <p>No saved trips yet.</p>
-            <a href="/create" class="btn-primary" style="margin-top:1rem">Plan Your First Trip</a>
-          </div>
-        {% endif %}
+          <form action="/trips/{{ trip.id }}/delete" method="post" class="stc-delete-form"
+                onsubmit="return confirm('Delete this trip to {{ trip.destination }}?');">
+            <button type="submit" class="stc-delete-btn" title="Delete trip"><i data-lucide="trash-2"></i></button>
+          </form>
+        </div>
+        {% endfor %}
       </div>
-    </main>
+      {% else %}
+      <div class="empty-state">
+        <div class="empty-icon"><i data-lucide="plane"></i></div>
+        <h3>No trips yet</h3>
+        <p>Your saved trips will appear here after you plan them.</p>
+        <a href="/create" class="btn btn-primary">Plan Your First Trip</a>
+      </div>
+      {% endif %}
+    </div>
   </div>
+</div>
 </body>
 </html>
