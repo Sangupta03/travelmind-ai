@@ -19,21 +19,29 @@ class MapsOptimizer:
         }
 
     def order_by_nearest(self, start, places):
-        # greedy nearest-neighbor ordering by driving time
+        # Greedy nearest-neighbor ordering by driving time.
+        # Each iteration resolves distances to ALL remaining places in a
+        # single batched API call, instead of one call per pair (which was
+        # O(n^2) requests and prone to timing out for longer trips).
         ordered = []
         current = start
         remaining = places[:]
 
         while remaining:
+            dm = self.maps.distance_matrix_batch(current, remaining, mode="driving")
+            rows = dm.get("rows", [])
+            elements = rows[0]["elements"] if rows else []
+
             best = None
             best_time = None
-            for p in remaining:
-                info = self.compute_pairwise_time(current, p, mode="driving")
-                if not info:
+            for place, elem in zip(remaining, elements):
+                if elem.get("status") != "OK":
                     continue
-                if best_time is None or info["duration_value"] < best_time:
-                    best_time = info["duration_value"]
-                    best = p
+                duration = elem["duration"]["value"]
+                if best_time is None or duration < best_time:
+                    best_time = duration
+                    best = place
+
             if not best:
                 break
             ordered.append(best)
