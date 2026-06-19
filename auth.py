@@ -2,6 +2,7 @@
 auth.py — Password hashing + JWT token logic
 """
 
+import os
 from datetime import datetime, timedelta
 from typing import Optional
 
@@ -10,11 +11,9 @@ from bcrypt import hashpw, checkpw, gensalt
 
 # ============================================================
 # CONFIG
-# Pull SECRET_KEY from .env in production.
-
 # ============================================================
 
-SECRET_KEY = "travelmind-secret-key-change-in-production-2024"
+SECRET_KEY = os.getenv("JWT_SECRET_KEY", "travelmind-secret-key-change-in-production-2024")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
 

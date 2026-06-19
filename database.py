@@ -1,19 +1,28 @@
 """
-database.py — SQLAlchemy + SQLite setup
+database.py — SQLAlchemy setup
 
+Uses DATABASE_URL from the environment when set (e.g. a hosted Postgres
+instance in production), and falls back to a local SQLite file otherwise.
 """
 
+import os
 from sqlalchemy import create_engine, Column, Integer, String, Float, Text, DateTime
 from sqlalchemy.orm import declarative_base, sessionmaker
 from datetime import datetime
 import json
 
-# SQLite file will be created at travelmind-ai/travelmind.db automatically
-SQLALCHEMY_DATABASE_URL = "sqlite:///./travelmind.db"
+SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./travelmind.db")
+
+# Some providers (Render, Heroku, Neon) hand out "postgres://" URLs, but
+# SQLAlchemy 1.4+ requires the "postgresql://" scheme.
+if SQLALCHEMY_DATABASE_URL.startswith("postgres://"):
+    SQLALCHEMY_DATABASE_URL = SQLALCHEMY_DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
+_is_sqlite = SQLALCHEMY_DATABASE_URL.startswith("sqlite")
 
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL,
-    connect_args={"check_same_thread": False}  # needed for SQLite + FastAPI
+    connect_args={"check_same_thread": False} if _is_sqlite else {}
 )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -97,7 +106,11 @@ class Trip(Base):
 
 def init_db():
     Base.metadata.create_all(bind=engine)
-    _migrate_missing_columns()
+    # Only needed for a pre-existing SQLite file from before these columns
+    # existed. A fresh Postgres database already gets the full schema from
+    # create_all() above.
+    if _is_sqlite:
+        _migrate_missing_columns()
 
 
 def _migrate_missing_columns():
