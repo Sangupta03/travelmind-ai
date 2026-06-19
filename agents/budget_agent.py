@@ -7,11 +7,14 @@ class BudgetAgent:
         self.flight_client = FlightSearch()
         self.hotel_client = HotelSearch()
 
-    def create_plan(self, destination, days, constraints):
-        flights = self.flight_client.search_flights("DEL", destination[:3].upper())
-        hotels = self.hotel_client.search_hotels(destination)
+    def create_plan(self, destination, days, constraints, departure_date=None, origin="Delhi", selected_hotel=None):
+        flights = self.flight_client.search_flights(origin, destination, departure_date)
 
-        selected_hotel = hotels[0] if hotels else {"name": "City Center Hotel"}
+        if selected_hotel:
+            hotels = [selected_hotel]
+        else:
+            hotels = self.hotel_client.search_hotels(destination, departure_date, days)
+            selected_hotel = hotels[0] if hotels else {"name": "City Center Hotel"}
 
         prompt = f"""
         You are a Budget Travel Agent.
@@ -36,7 +39,8 @@ class BudgetAgent:
 
         return {
             "plan": plan,
-            "hotel": selected_hotel
+            "hotel": selected_hotel,
+            "flights": flights
         }
 
 

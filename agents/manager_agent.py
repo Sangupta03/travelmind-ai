@@ -8,6 +8,7 @@ This is the difference between a toy system and a real one.
 """
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from datetime import datetime, timedelta
 import json
 import time
 
@@ -57,9 +58,9 @@ class ManagerAgent:
     # PRIVATE — run one agent, return (name, result)
     # =========================================================
 
-    def _run_budget(self, destination, days, constraints):
+    def _run_budget(self, destination, days, constraints, departure_date=None, origin="Delhi", selected_hotel=None):
         print("  [parallel] BudgetAgent starting...")
-        result = self.budget_agent.create_plan(destination, days, constraints)
+        result = self.budget_agent.create_plan(destination, days, constraints, departure_date, origin, selected_hotel)
         print("  [parallel] BudgetAgent done.")
         return result
 
@@ -79,7 +80,7 @@ class ManagerAgent:
     # MAIN — build_travel_plan
     # =========================================================
 
-    def build_travel_plan(self, username, user_input, destination, days):
+    def build_travel_plan(self, username, user_input, destination, days, departure_date=None, origin="Delhi", toggles=None, selected_hotel=None):
 
         # --------------------------------------------------
         # 1. Extract user constraints (sequential — needed
@@ -102,6 +103,20 @@ class ManagerAgent:
         else:
             constraints = constraints_raw
 
+        # Quick-toggle checkboxes are deterministic — they override
+        # whatever (or nothing) the LLM inferred from free text.
+        if toggles:
+            if toggles.get("low_walking"):
+                constraints["walking_preference"] = "low"
+            if toggles.get("budget_strict"):
+                constraints["budget"] = "strict budget"
+            if toggles.get("elderly"):
+                constraints["travel_with_elderly"] = True
+            if toggles.get("vegetarian"):
+                constraints["food_preference"] = "vegetarian"
+            if toggles.get("family"):
+                constraints["family_trip"] = True
+
         # --------------------------------------------------
         # 2. Run Budget, Comfort, Experience IN PARALLEL
         #    This is the core improvement over the old version.
@@ -116,7 +131,7 @@ class ManagerAgent:
 
         # Map each future to its agent name for error reporting
         with ThreadPoolExecutor(max_workers=3) as executor:
-            future_budget     = executor.submit(self._run_budget,     destination, days, constraints)
+            future_budget     = executor.submit(self._run_budget,     destination, days, constraints, departure_date, origin, selected_hotel)
             future_comfort    = executor.submit(self._run_comfort,    destination, days, constraints)
             future_experience = executor.submit(self._run_experience, destination, days, constraints)
 
@@ -153,6 +168,7 @@ class ManagerAgent:
         # Extract from budget result
         budget_plan = budget_result.get("plan", "") if budget_result else ""
         hotel       = budget_result.get("hotel", {"name": destination}) if budget_result else {"name": destination}
+        flights     = budget_result.get("flights", []) if budget_result else []
 
         # --------------------------------------------------
         # 3. Negotiator merges the three plans (sequential —
@@ -172,7 +188,18 @@ class ManagerAgent:
         # 4. Hard constraint engine
         # --------------------------------------------------
         flight_cost = 6000
-        hotel_cost  = 2500 * days
+        if flights and flights[0].get("price_value"):
+            flight_cost = round(flights[0]["price_value"])
+
+        hotel_cost = 2500 * days
+        hotel_price_raw = hotel.get("price") if isinstance(hotel, dict) else None
+        if hotel_price_raw:
+            try:
+                per_night = float(str(hotel_price_raw).replace("₹", "").replace(",", "").strip())
+                hotel_cost = round(per_night * days)
+            except ValueError:
+                pass
+
         local_cost  = 3000
         food_cost   = 4000
 
@@ -190,13 +217,13 @@ class ManagerAgent:
         # 5. Maps intelligence
         # --------------------------------------------------
         print("\nOptimizing route with Google Maps...")
-        attractions = self.attractions_tool.get_attractions(destination)
+        places_needed = min(max(days * 3, 6), 20)
+        attractions = self.attractions_tool.get_attractions(destination, limit=places_needed)
         hotel_name  = hotel.get("name", destination)
         start_point = f"{hotel_name}, {destination}"
 
-        places_needed = max(days * 3, 6)
         ordered_places = self.maps_optimizer.order_by_nearest(
-            start_point, attractions[:places_needed]
+            start_point, attractions
         )
 
         # --------------------------------------------------
@@ -249,6 +276,17 @@ class ManagerAgent:
         final_plan = f"\n🏨 Selected Hotel: {hotel_name}\n" + final_plan
 
         # --------------------------------------------------
+        # 7b. Calendar dates per day (only if a departure date was given)
+        # --------------------------------------------------
+        day_dates = []
+        if departure_date:
+            try:
+                start = datetime.strptime(departure_date, "%Y-%m-%d")
+                day_dates = [(start + timedelta(days=i)).strftime("%d %b %Y") for i in range(len(daily_plan))]
+            except ValueError:
+                day_dates = []
+
+        # --------------------------------------------------
         # 8. Structured return
         # --------------------------------------------------
         return {
@@ -262,6 +300,9 @@ class ManagerAgent:
             "daily_plan":     daily_plan,
             "transport":      transport_rows,
             "ai_reasoning":   final_plan,
+            "departure_date": departure_date,
+            "day_dates":      day_dates,
+            "flights":        flights,
 
             # Metadata for UI / resume talking point
             "agent_execution": "parallel",

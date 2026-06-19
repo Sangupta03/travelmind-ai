@@ -1,6 +1,5 @@
 """
 auth.py — Password hashing + JWT token logic
-Place this at: travelmind-ai/auth.py
 """
 
 from datetime import datetime, timedelta
@@ -12,7 +11,7 @@ from bcrypt import hashpw, checkpw, gensalt
 # ============================================================
 # CONFIG
 # Pull SECRET_KEY from .env in production.
-# For resume/demo: a hardcoded key is fine.
+
 # ============================================================
 
 SECRET_KEY = "travelmind-secret-key-change-in-production-2024"

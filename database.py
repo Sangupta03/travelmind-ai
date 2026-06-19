@@ -1,6 +1,6 @@
 """
 database.py — SQLAlchemy + SQLite setup
-Place this at: travelmind-ai/database.py
+
 """
 
 from sqlalchemy import create_engine, Column, Integer, String, Float, Text, DateTime
@@ -53,6 +53,11 @@ class Trip(Base):
     transport_json       = Column(Text, default="[]")
     ai_reasoning         = Column(Text, default="")
 
+    # Optional trip start date (user-provided) and derived per-day calendar labels
+    start_date            = Column(String, nullable=True)
+    day_dates_json        = Column(Text, default="[]")
+    flights_json          = Column(Text, default="[]")
+
     created_at = Column(DateTime, default=datetime.utcnow)
 
     # ---- helper properties so the rest of the app can do trip.cost_breakdown ----
@@ -77,6 +82,14 @@ class Trip(Base):
     def transport(self):
         return json.loads(self.transport_json or "[]")
 
+    @property
+    def day_dates(self):
+        return json.loads(self.day_dates_json or "[]")
+
+    @property
+    def flights(self):
+        return json.loads(self.flights_json or "[]")
+
 
 # ============================================================
 # CREATE ALL TABLES (run once on startup)
@@ -84,6 +97,22 @@ class Trip(Base):
 
 def init_db():
     Base.metadata.create_all(bind=engine)
+    _migrate_missing_columns()
+
+
+def _migrate_missing_columns():
+    """Add columns introduced after a trips table already existed (SQLite has no ALTER ... IF NOT EXISTS)."""
+    with engine.connect() as conn:
+        existing = {row[1] for row in conn.exec_driver_sql("PRAGMA table_info(trips)")}
+        new_columns = {
+            "start_date":     "TEXT",
+            "day_dates_json": "TEXT DEFAULT '[]'",
+            "flights_json":   "TEXT DEFAULT '[]'",
+        }
+        for col, coltype in new_columns.items():
+            if col not in existing:
+                conn.exec_driver_sql(f"ALTER TABLE trips ADD COLUMN {col} {coltype}")
+        conn.commit()
 
 
 # ============================================================

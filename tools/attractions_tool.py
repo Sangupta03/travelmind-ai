@@ -4,10 +4,10 @@ class AttractionsTool:
     def __init__(self):
         self.maps = MapsTool()
 
-    def get_attractions(self, city):
+    def get_attractions(self, city, limit=8):
         loc = self.maps.geocode(city)
         if not loc:
             return []
         data = self.maps.nearby_places(loc, keyword="tourist attraction", radius=8000)
-        results = data.get("results", [])[:8]
+        results = data.get("results", [])[:limit]
         return [r["name"] for r in results]

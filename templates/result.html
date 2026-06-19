@@ -141,6 +141,9 @@
         <div class="day-block">
           <div class="day-label">
             <span class="day-badge">Day {{ loop.index }}</span>
+            {% if day_dates and day_dates|length >= loop.index %}
+            <span class="day-date">{{ day_dates[loop.index0] }}</span>
+            {% endif %}
             <span class="day-count">{{ day | length }} place{{ 's' if day|length != 1 }}</span>
           </div>
           <div class="place-list">
@@ -176,45 +179,46 @@
     ══════════════════════════════════════════════ -->
     <div class="tab-content" id="tab-transport">
       {% if transport %}
-        {% set ns = namespace(day=None) %}
-        {% for leg in transport %}
-          {% if leg.day != ns.day %}
-            {% if not loop.first %}</div>{% endif %}
-            {% set ns.day = leg.day %}
-            <div class="day-block">
-              <div class="day-label">
-                <span class="day-badge">Day {{ leg.day }}</span>
-              </div>
-              <div class="transport-list">
-          {% endif %}
-          <div class="transport-item">
-            <div class="transport-route">
-              <span class="t-place">{{ leg.from }}</span>
-              <div class="t-connector">
-                <div class="t-line-seg"></div>
-                <span class="t-mode {{ 't-mode-walk' if leg.mode == 'WALK' else 't-mode-cab' if leg.mode == 'CAB' else 't-mode-unknown' }}">
-                  {% if leg.mode == 'WALK' %}<i data-lucide="footprints"></i> Walk
-                  {% elif leg.mode == 'CAB' %}<i data-lucide="car-taxi-front"></i> Cab
-                  {% else %}<i data-lucide="help-circle"></i> {{ leg.mode }}{% endif %}
-                </span>
-                <div class="t-line-seg"></div>
-              </div>
-              <span class="t-place">{{ leg.to }}</span>
-            </div>
-            <div class="transport-details">
-              {% if leg.distance %}<span><i data-lucide="ruler"></i> {{ leg.distance }}</span>{% endif %}
-              {% if leg.time %}<span><i data-lucide="clock"></i> {{ leg.time }}</span>{% endif %}
-            </div>
-            {% if leg.reason %}
-            <div class="transport-reason"><i data-lucide="lightbulb"></i> {{ leg.reason }}</div>
-            {% endif %}
-            {% if leg.link %}
-            <a href="{{ leg.link }}" target="_blank" class="transport-maps-btn">
-              Open in Google Maps <i data-lucide="arrow-up-right"></i>
-            </a>
+        {% for day_num, legs in transport | groupby('day') %}
+        <div class="day-block">
+          <div class="day-label">
+            <span class="day-badge">Day {{ day_num }}</span>
+            {% if day_dates and day_num and day_dates|length >= day_num %}
+            <span class="day-date">{{ day_dates[day_num - 1] }}</span>
             {% endif %}
           </div>
-          {% if loop.last %}</div></div>{% endif %}
+          <div class="transport-list">
+            {% for leg in legs %}
+            <div class="transport-item">
+              <div class="transport-route">
+                <span class="t-place">{{ leg.from }}</span>
+                <div class="t-connector">
+                  <div class="t-line-seg"></div>
+                  <span class="t-mode {{ 't-mode-walk' if leg.mode == 'WALK' else 't-mode-cab' if leg.mode == 'CAB' else 't-mode-unknown' }}">
+                    {% if leg.mode == 'WALK' %}<i data-lucide="footprints"></i> Walk
+                    {% elif leg.mode == 'CAB' %}<i data-lucide="car-taxi-front"></i> Cab
+                    {% else %}<i data-lucide="help-circle"></i> {{ leg.mode }}{% endif %}
+                  </span>
+                  <div class="t-line-seg"></div>
+                </div>
+                <span class="t-place">{{ leg.to }}</span>
+              </div>
+              <div class="transport-details">
+                {% if leg.distance %}<span><i data-lucide="ruler"></i> {{ leg.distance }}</span>{% endif %}
+                {% if leg.time %}<span><i data-lucide="clock"></i> {{ leg.time }}</span>{% endif %}
+              </div>
+              {% if leg.reason %}
+              <div class="transport-reason"><i data-lucide="lightbulb"></i> {{ leg.reason }}</div>
+              {% endif %}
+              {% if leg.link %}
+              <a href="{{ leg.link }}" target="_blank" class="transport-maps-btn">
+                Open in Google Maps <i data-lucide="arrow-up-right"></i>
+              </a>
+              {% endif %}
+            </div>
+            {% endfor %}
+          </div>
+        </div>
         {% endfor %}
       {% else %}
         <div class="empty-state">
@@ -253,8 +257,27 @@
             <span class="budget-total-amt">₹{{ "{:,.0f}".format(cost) if cost else 'N/A' }}</span>
           </div>
           <p style="font-size:0.75rem;color:var(--gray-400);margin-top:0.8rem">
-            * Flight costs are estimated. Hotel prices sourced from SerpAPI.
+            {% if flights and flights[0].data_source == 'amadeus_live' %}
+              * Flight price is live from Amadeus for {{ destination }}{{ ' on ' + departure_date if departure_date }}.
+            {% else %}
+              * Flight cost is a budget estimate. Add a departure date when planning for live Amadeus pricing.
+            {% endif %}
           </p>
+
+          {% if flights %}
+          <div style="margin-top:1.2rem;padding-top:1rem;border-top:1px solid var(--gray-100)">
+            <h4 style="font-size:0.85rem;margin-bottom:0.6rem">Flight Options</h4>
+            {% for f in flights[:4] %}
+            <div class="ov-row">
+              <span><i data-lucide="plane" style="width:0.9em"></i> {{ f.airline }} {{ f.flight_number }}</span>
+              <strong>{{ f.price }}</strong>
+            </div>
+            {% endfor %}
+            <p style="font-size:0.72rem;color:var(--gray-400);margin-top:0.4rem">
+              Source: {{ 'Live (Amadeus)' if flights[0].data_source == 'amadeus_live' else 'Live schedule, no pricing (AviationStack)' if flights[0].data_source == 'aviationstack_live' else 'Simulated demo data' }}
+            </p>
+          </div>
+          {% endif %}
         </div>
 
         <div class="budget-chart-card">

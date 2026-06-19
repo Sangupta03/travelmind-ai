@@ -15,6 +15,7 @@ from database import init_db, get_db, User, Trip
 from auth import hash_password, verify_password, create_access_token, get_current_user
 from agents.manager_agent import ManagerAgent
 from core.constraints import DEFAULT_MAX_BUDGET
+from tools.hotel_tool import HotelSearch
 
 app = FastAPI(title="TravelMind AI")
 agent = ManagerAgent()
@@ -205,25 +206,89 @@ def create_page(request: Request):
     )
 
 
+# ── HOTEL SELECTION ─────────────────────────────────────────────
+
+@app.post("/select-hotel", response_class=HTMLResponse)
+def select_hotel_page(
+    request: Request,
+    name: str            = Form(...),
+    needs: str            = Form(default=""),
+    destination: str      = Form(...),
+    days: int             = Form(...),
+    departure_date: str   = Form(default=""),
+    origin: str            = Form(default=""),
+    low_walking: str       = Form(default=""),
+    budget_strict: str     = Form(default=""),
+    elderly: str            = Form(default=""),
+    vegetarian: str         = Form(default=""),
+    family: str             = Form(default=""),
+):
+    user = get_current_user(request)
+    if not user:
+        return RedirectResponse("/login", 302)
+
+    hotels = HotelSearch().search_hotels(destination, departure_date or None, days)
+
+    return templates.TemplateResponse(
+        "select_hotel.html",
+        base_ctx(request, user, {
+            "active_page": "create",
+            "destination": destination,
+            "days":        days,
+            "hotels":      hotels,
+            "trip_fields": {
+                "name": name, "needs": needs, "destination": destination, "days": days,
+                "departure_date": departure_date, "origin": origin,
+                "low_walking": low_walking, "budget_strict": budget_strict,
+                "elderly": elderly, "vegetarian": vegetarian, "family": family,
+            }
+        })
+    )
+
+
 # ── PLAN ─────────────────────────────────────────────────────
 
 @app.post("/plan", response_class=HTMLResponse)
 def create_plan(
     request: Request,
-    name: str        = Form(...),
-    needs: str = Form(default=""),
-    destination: str = Form(...),
-    days: int        = Form(...),
-    db: Session      = Depends(get_db),
+    name: str            = Form(...),
+    needs: str            = Form(default=""),
+    destination: str      = Form(...),
+    days: int             = Form(...),
+    departure_date: str   = Form(default=""),
+    origin: str            = Form(default=""),
+    low_walking: str       = Form(default=""),
+    budget_strict: str     = Form(default=""),
+    elderly: str            = Form(default=""),
+    vegetarian: str         = Form(default=""),
+    family: str             = Form(default=""),
+    selected_hotel_json: str = Form(default=""),
+    db: Session           = Depends(get_db),
 ):
-    
-    
     user = get_current_user(request)
     if not user:
         return RedirectResponse("/login", 302)
 
+    toggles = {
+        "low_walking":    bool(low_walking),
+        "budget_strict":  bool(budget_strict),
+        "elderly":        bool(elderly),
+        "vegetarian":     bool(vegetarian),
+        "family":         bool(family),
+    }
+
+    selected_hotel = None
+    if selected_hotel_json:
+        try:
+            selected_hotel = json.loads(selected_hotel_json)
+        except ValueError:
+            selected_hotel = None
+
     # Run the full agent pipeline
-    result = agent.build_travel_plan(name, needs, destination, days)
+    result = agent.build_travel_plan(
+        name, needs, destination, days, departure_date or None,
+        origin.strip() or "Delhi", toggles, selected_hotel
+    )
 
     # Persist to SQLite
     trip = Trip(
@@ -239,6 +304,9 @@ def create_plan(
         daily_plan_json     = json.dumps(result["daily_plan"]),
         transport_json      = json.dumps(result["transport"]),
         ai_reasoning        = result["ai_reasoning"],
+        start_date          = result.get("departure_date"),
+        day_dates_json      = json.dumps(result.get("day_dates", [])),
+        flights_json        = json.dumps(result.get("flights", [])),
     )
     db.add(trip)
     db.commit()
@@ -273,6 +341,8 @@ def result_page(request: Request, trip_id: int, db: Session = Depends(get_db)):
             "transport":      trip.transport,
             "ai_reasoning":   trip.ai_reasoning,
             "insights":       build_insights(trip),
+            "day_dates":      trip.day_dates,
+            "flights":        trip.flights,
         })
     )
 

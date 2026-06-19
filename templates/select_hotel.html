@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TravelMind AI — Choose a Hotel</title>
+  <link rel="stylesheet" href="/static/style.css"/>
+</head>
+<body>
+<div class="app-shell">
+
+  {% set active_page = 'create' %}
+  {% include 'sidebar.html' %}
+
+  <div class="app-main">
+    <div class="app-topbar">
+      <div>
+        <div class="topbar-title">Choose Your Hotel</div>
+        <div class="topbar-sub">{{ destination }} · {{ days }} Day{{ 's' if days != 1 }}</div>
+      </div>
+      <a href="/create" class="btn btn-outline"><i data-lucide="arrow-left" style="width:0.9em"></i> Back</a>
+    </div>
+
+    <div class="app-content">
+      <form id="hotelForm" action="/plan" method="POST">
+
+        {% for key, value in trip_fields.items() %}
+        <input type="hidden" name="{{ key }}" value="{{ value }}"/>
+        {% endfor %}
+        <input type="hidden" name="selected_hotel_json" id="selectedHotelJson" value=""/>
+
+        <div class="create-form-card fade-up" style="max-width:760px">
+          <h2>Available Hotels</h2>
+
+          {% if hotels %}
+          <div class="hotel-option-list">
+            {% for h in hotels %}
+            <label class="hotel-option">
+              <input type="radio" name="hotel_choice" value="{{ loop.index0 }}" {{ 'checked' if loop.first }}/>
+              <div class="hotel-option-body">
+                <div class="hotel-option-name"><i data-lucide="building-2" style="width:0.95em"></i> {{ h.name }}</div>
+                <div class="hotel-option-meta">
+                  {% if h.rating %}<span><i data-lucide="check" style="width:0.85em"></i> {{ h.rating }} rating</span>{% endif %}
+                </div>
+              </div>
+              <div class="hotel-option-price">
+                {% if h.price %}₹{{ h.price | replace('₹', '') }} <span>/ night</span>{% else %}<span style="color:var(--gray-400);font-size:0.78rem">Price unavailable</span>{% endif %}
+              </div>
+            </label>
+            {% endfor %}
+          </div>
+          {% else %}
+          <div class="empty-state" style="padding:2rem 0">
+            <div class="empty-icon"><i data-lucide="building-2"></i></div>
+            <h3>No live hotel results</h3>
+            <p>We couldn't fetch hotel options for these dates. We'll pick a sensible default for your trip.</p>
+          </div>
+          {% endif %}
+
+          <button type="submit" class="btn btn-primary btn-full btn-lg" id="submitBtn" style="margin-top:1.5rem">
+            <span id="btnText">Generate AI Plan <i data-lucide="arrow-right"></i></span>
+            <span id="btnLoader" style="display:none"><i data-lucide="loader-2" class="spin"></i> Agents working...</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<script>
+  const hotels = {{ hotels | tojson }};
+
+  document.getElementById('hotelForm').addEventListener('submit', function() {
+    const checked = document.querySelector('input[name="hotel_choice"]:checked');
+    if (checked) {
+      const hotel = hotels[parseInt(checked.value)];
+      document.getElementById('selectedHotelJson').value = JSON.stringify(hotel);
+    }
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    document.getElementById('btnText').style.display = 'none';
+    document.getElementById('btnLoader').style.display = 'inline';
+  });
+
+  document.addEventListener('DOMContentLoaded', () => {
+    if (window.lucide) lucide.createIcons();
+  });
+</script>
+</body>
+</html>
