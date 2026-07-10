@@ -79,6 +79,10 @@ class Trip(Base):
     day_dates_json        = Column(Text, default="[]")
     flights_json          = Column(Text, default="[]")
 
+    # Embedding of a short trip summary, used to retrieve semantically
+    # similar past trips (RAG) when planning a new one — see core/embeddings.py
+    embedding_json         = Column(Text, nullable=True)
+
     created_at = Column(DateTime, default=datetime.utcnow)
 
     # ---- helper properties so the rest of the app can do trip.cost_breakdown ----
@@ -111,6 +115,10 @@ class Trip(Base):
     def flights(self):
         return json.loads(self.flights_json or "[]")
 
+    @property
+    def embedding(self):
+        return json.loads(self.embedding_json) if self.embedding_json else None
+
 
 # ============================================================
 # CREATE ALL TABLES (run once on startup)
@@ -118,22 +126,31 @@ class Trip(Base):
 
 def init_db():
     Base.metadata.create_all(bind=engine)
-    # Only needed for a pre-existing SQLite file from before these columns
-    # existed. A fresh Postgres database already gets the full schema from
-    # create_all() above.
-    if _is_sqlite:
-        _migrate_missing_columns()
+    # create_all() only creates tables that don't exist yet — it never
+    # alters an existing table to add new columns. So this must run for
+    # both SQLite and Postgres, not just SQLite: any already-deployed
+    # database (e.g. the live Render Postgres instance) still needs
+    # these ALTER TABLE statements for columns added after its first deploy.
+    _migrate_missing_columns()
 
 
 def _migrate_missing_columns():
-    """Add columns introduced after a trips table already existed (SQLite has no ALTER ... IF NOT EXISTS)."""
+    """Add columns introduced after the trips table already existed."""
+    new_columns = {
+        "start_date":      "TEXT",
+        "day_dates_json":  "TEXT DEFAULT '[]'",
+        "flights_json":    "TEXT DEFAULT '[]'",
+        "embedding_json":  "TEXT",
+    }
     with engine.connect() as conn:
-        existing = {row[1] for row in conn.exec_driver_sql("PRAGMA table_info(trips)")}
-        new_columns = {
-            "start_date":     "TEXT",
-            "day_dates_json": "TEXT DEFAULT '[]'",
-            "flights_json":   "TEXT DEFAULT '[]'",
-        }
+        if _is_sqlite:
+            existing = {row[1] for row in conn.exec_driver_sql("PRAGMA table_info(trips)")}
+        else:
+            existing = {
+                row[0] for row in conn.exec_driver_sql(
+                    "SELECT column_name FROM information_schema.columns WHERE table_name = 'trips'"
+                )
+            }
         for col, coltype in new_columns.items():
             if col not in existing:
                 conn.exec_driver_sql(f"ALTER TABLE trips ADD COLUMN {col} {coltype}")
