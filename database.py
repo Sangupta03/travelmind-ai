@@ -79,9 +79,11 @@ class Trip(Base):
     day_dates_json        = Column(Text, default="[]")
     flights_json          = Column(Text, default="[]")
 
-    # Embedding of a short trip summary, used to retrieve semantically
-    # similar past trips (RAG) when planning a new one — see core/embeddings.py
-    embedding_json         = Column(Text, nullable=True)
+    # Raw free-text trip description as typed by the user, and its
+    # embedding — used to retrieve semantically similar past trips (RAG)
+    # when planning a new one. See core/embeddings.py.
+    user_input_text        = Column(Text, nullable=True)
+    embedding_json          = Column(Text, nullable=True)
 
     created_at = Column(DateTime, default=datetime.utcnow)
 
@@ -137,10 +139,11 @@ def init_db():
 def _migrate_missing_columns():
     """Add columns introduced after the trips table already existed."""
     new_columns = {
-        "start_date":      "TEXT",
-        "day_dates_json":  "TEXT DEFAULT '[]'",
-        "flights_json":    "TEXT DEFAULT '[]'",
-        "embedding_json":  "TEXT",
+        "start_date":       "TEXT",
+        "day_dates_json":   "TEXT DEFAULT '[]'",
+        "flights_json":     "TEXT DEFAULT '[]'",
+        "user_input_text":  "TEXT",
+        "embedding_json":   "TEXT",
     }
     with engine.connect() as conn:
         if _is_sqlite:

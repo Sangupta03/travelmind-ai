@@ -5,6 +5,16 @@ without a real API key or network access.
 import core.embeddings as embeddings
 
 
+def test_trip_summary_text_combines_destination_and_input():
+    text = embeddings.trip_summary_text("Chennai", "Budget trip focused on temples")
+    assert text == "Trip to Chennai: Budget trip focused on temples"
+
+
+def test_trip_summary_text_handles_missing_input():
+    text = embeddings.trip_summary_text("Chennai", "")
+    assert text == "Trip to Chennai:"
+
+
 class _FakeEmbedding:
     def __init__(self, values):
         self.values = values
