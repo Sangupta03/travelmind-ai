@@ -23,4 +23,9 @@ jobs:
         run: pip install -r requirements-dev.txt
 
       - name: Run tests
+        env:
+          # Tests mock every Gemini call, so this just needs to be a
+          # non-empty string to satisfy the Client() constructor at import
+          # time — it's never used to make a real API call.
+          GEMINI_API_KEY: "ci-placeholder-key"
         run: pytest tests/ -v
