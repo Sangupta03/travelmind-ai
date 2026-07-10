@@ -22,6 +22,8 @@ from agents.manager_agent import ManagerAgent
 from core.constraints import DEFAULT_MAX_BUDGET
 from core.preferences import format_preferences
 from core.markdown_render import render_ai_reasoning
+from core.embeddings import embed_text, trip_summary_text
+from core.retrieval import find_similar
 from tools.hotel_tool import HotelSearch
 
 logging.basicConfig(
@@ -259,6 +261,36 @@ def select_hotel_page(
 
 # ── PLAN ─────────────────────────────────────────────────────
 
+def _find_similar_past_trips(db: Session, user: dict, destination: str, needs: str, top_k: int = 3) -> list:
+    """
+    RAG retrieval step: embeds this new trip's free-text description and
+    finds this account's own past trips whose description is most
+    semantically similar (not just the most recent one), so a budget
+    temple-focused trip pulls in past budget/temple trips rather than
+    whatever you happened to plan last, e.g. an unrelated luxury trip.
+
+    Falls back to an empty list (no hint, not a crash) if there are no
+    past trips with an embedding yet, or if embedding the query fails
+    (e.g. API quota) — retrieval is a soft enhancement, never a blocker.
+    """
+    past_trips = (
+        db.query(Trip)
+        .filter(Trip.user_id == int(user["sub"]), Trip.embedding_json.isnot(None))
+        .all()
+    )
+    if not past_trips:
+        return []
+
+    query_embedding = embed_text(trip_summary_text(destination, needs))
+    if not query_embedding:
+        return []
+
+    candidates = [(trip, trip.embedding) for trip in past_trips]
+    similar_trips = find_similar(query_embedding, candidates, top_k=top_k)
+
+    return [{"destination": t.destination, "constraints": t.constraints} for t in similar_trips]
+
+
 @app.get("/plan")
 def plan_get_redirect():
     """
@@ -306,22 +338,13 @@ def create_plan(
         except ValueError:
             selected_hotel = None
 
-    # Use the constraints from this account's most recent trip (if any) as
-    # a hint for the LLM, so preferences carry over across trips without a
-    # separate memory store — Trip rows are already the source of truth.
-    last_trip = (
-        db.query(Trip)
-        .filter(Trip.user_id == int(user["sub"]))
-        .order_by(Trip.created_at.desc())
-        .first()
-    )
-    previous_constraints = last_trip.constraints if last_trip else None
+    similar_past_trips = _find_similar_past_trips(db, user, destination, needs)
 
     # Run the full agent pipeline
     result = agent.build_travel_plan(
         needs, destination, days, departure_date or None,
         origin.strip() or "Delhi", toggles, selected_hotel,
-        previous_constraints=previous_constraints,
+        similar_past_trips=similar_past_trips,
     )
 
     # Persist to SQLite
@@ -341,10 +364,20 @@ def create_plan(
         start_date          = result.get("departure_date"),
         day_dates_json      = json.dumps(result.get("day_dates", [])),
         flights_json        = json.dumps(result.get("flights", [])),
+        user_input_text     = needs,
     )
     db.add(trip)
     db.commit()
     db.refresh(trip)
+
+    # Best-effort: embed this trip's own description so future trips can
+    # retrieve it. If this fails (e.g. quota), the trip is just skipped
+    # as a retrieval candidate later — never blocks saving the trip itself.
+    embedding = embed_text(trip_summary_text(trip.destination, needs))
+    if embedding:
+        trip.embedding_json = json.dumps(embedding)
+        db.commit()
+
     return RedirectResponse(f"/result/{trip.id}", 302)
 
 
