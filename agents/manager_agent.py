@@ -82,14 +82,14 @@ class ManagerAgent:
     # MAIN — build_travel_plan
     # =========================================================
 
-    def build_travel_plan(self, user_input, destination, days, departure_date=None, origin="Delhi", toggles=None, selected_hotel=None, previous_constraints=None):
+    def build_travel_plan(self, user_input, destination, days, departure_date=None, origin="Delhi", toggles=None, selected_hotel=None, similar_past_trips=None):
 
         # --------------------------------------------------
         # 1. Extract user constraints (sequential — needed
         #    before agents can start)
         # --------------------------------------------------
         logger.info("Extracting user constraints...")
-        constraints = self.user_agent.extract_constraints(user_input, previous_constraints)
+        constraints = self.user_agent.extract_constraints(user_input, similar_past_trips)
 
         # Quick-toggle checkboxes are deterministic — they override
         # whatever (or nothing) the LLM inferred from free text.

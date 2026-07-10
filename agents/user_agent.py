@@ -36,13 +36,29 @@ CONSTRAINTS_SCHEMA = {
 
 
 class UserAgent:
-    def extract_constraints(self, user_input: str, previous_constraints: dict = None) -> dict:
+    def extract_constraints(self, user_input: str, similar_past_trips: list = None) -> dict:
+        """
+        similar_past_trips: the traveler's own past trips whose free-text
+        description was semantically closest to this new one (retrieved
+        via embeddings — see core/retrieval.py), most similar first. Each
+        item looks like {"destination": ..., "constraints": {...}}.
+        Used only as a hint; the new input below always takes priority.
+        """
+        past_trips_text = "None"
+        if similar_past_trips:
+            past_trips_text = "\n".join(
+                f"- Trip to {trip['destination']}: {trip['constraints']}"
+                for trip in similar_past_trips
+            )
+
         prompt = f"""
         You are an AI that extracts structured travel constraints.
 
-        Constraints from the traveler's previous trip, if any (use only as
-        a hint — the new input below always takes priority):
-        {previous_constraints or "None"}
+        Constraints from a few of the traveler's past trips that are most
+        similar to this new request (most similar first) — use only as a
+        hint about their general preferences, the new input below always
+        takes priority:
+        {past_trips_text}
 
         New user input:
         {user_input}
