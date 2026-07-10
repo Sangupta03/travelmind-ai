@@ -33,8 +33,19 @@ FUZZY_FIELDS = {"budget", "food_preference"}
 
 def check_field(actual: dict, field: str, expected) -> bool:
     actual_value = actual.get(field)
+
+    if field == "interests":
+        if not isinstance(actual_value, list):
+            return False
+        actual_lower = [str(v).lower() for v in actual_value]
+        return all(
+            any(exp.lower() in a for a in actual_lower)
+            for exp in expected
+        )
+
     if field in FUZZY_FIELDS:
         return isinstance(actual_value, str) and str(expected).lower() in actual_value.lower()
+
     return actual_value == expected
 
 

@@ -45,4 +45,19 @@ CASES = [
             "budget": "high",
         },
     },
+    {
+        "name": "specific interests mentioned",
+        "input": "I'd love to visit a spa and a church while we're there, and maybe check out some local markets.",
+        "expect": {
+            "interests": ["spa", "church", "market"],
+        },
+    },
+    {
+        "name": "flexible pace and walking preference",
+        "input": "Honestly I don't have a strong opinion on pace or how much we walk, whatever works.",
+        "expect": {
+            "walking_preference": "flexible",
+            "pace": "flexible",
+        },
+    },
 ]
