@@ -53,7 +53,8 @@ No mock itineraries — flights, hotels, distances, and routes all come from liv
 | 🚕 **Walk vs. cab, per leg** | Computed from real Google Distance Matrix data, grouped by day, with one-tap Google Maps links |
 | 💰 **Budget breakdown** | Flights, hotel, transport, food — each tagged live or estimated based on what data was actually available |
 | ✨ **Dynamic AI Insights** | Summary cards computed from *your* trip (distance, walk/cab split, applied preferences, budget %) — not canned copy |
-| 👤 **Auth + persistence** | JWT auth, bcrypt-hashed passwords, SQLite-backed trips per user, dashboard, deletable saved trips, profile page |
+| 👤 **Auth + persistence** | JWT auth, bcrypt-hashed passwords, SQLite/Postgres-backed trips per user, dashboard, deletable saved trips, profile page |
+| 🔎 **RAG-based personalization** | Each trip's free-text description is embedded (Gemini `gemini-embedding-001`); planning a new trip retrieves your own past trips that are *semantically* most similar (cosine similarity, not just "most recent") and feeds them to the constraint-extraction prompt as a hint |
 
 ---
 
@@ -63,9 +64,9 @@ No mock itineraries — flights, hotels, distances, and routes all come from liv
 |---|---|
 | Backend | FastAPI, Uvicorn |
 | Templates | Jinja2 (server-rendered, no SPA framework) |
-| Database | SQLite via SQLAlchemy ORM |
+| Database | SQLite (dev) / Postgres (prod) via SQLAlchemy ORM |
 | Auth | JWT (`python-jose`) + bcrypt |
-| AI | Gemini 2.5 Flash (`google-genai`) |
+| AI | Gemini 2.5 Flash (`google-genai`) for planning/reasoning, `gemini-embedding-001` for RAG retrieval |
 | Flights | Amadeus Self-Service API (live pricing) + AviationStack (fallback schedules) |
 | Hotels | SerpAPI (Google Hotels engine) |
 | Maps & Routing | Google Maps Platform — Geocoding, Places Nearby Search, Distance Matrix |
@@ -79,9 +80,17 @@ No mock itineraries — flights, hotels, distances, and routes all come from liv
                               User input
                                   │
                                   ▼
+                          RAG retrieval (core/retrieval.py)
+              embed this trip's description → cosine similarity
+              against this account's own past trip embeddings →
+                    top-k most similar past trips, not just
+                            the most recent one
+                                  │
+                                  ▼
                               UserAgent
                  extracts structured constraints (budget, walking
-                 preference, food, pace, elderly) via Gemini —
+                 preference, food, pace, interests, elderly) via Gemini,
+                 using the retrieved past trips only as a hint —
                  quick-toggle checkboxes override these deterministically
                                   │
                 ┌─────────────────┼─────────────────┐
@@ -118,12 +127,16 @@ travelmind-ai/
 │   └── negotiator_agent.py     # Merges the three plans
 │
 ├── core/
-│   ├── llm.py                  # Gemini wrapper
+│   ├── llm.py                  # Gemini wrapper (text generation)
+│   ├── embeddings.py           # Gemini embedding wrapper (RAG)
+│   ├── retrieval.py            # Cosine similarity + top-k ranking (RAG)
 │   ├── maps_optimizer.py       # Nearest-neighbor route ordering
 │   ├── daily_time_engine.py    # Splits attractions across days
 │   ├── transport_engine.py     # Walk vs. cab decision logic
 │   ├── walking_estimator.py
 │   ├── constraints.py          # Budget ceiling engine
+│   ├── preferences.py          # Formats constraints for display
+│   ├── markdown_render.py      # Renders AI reasoning as HTML
 │   └── validator.py            # Constraint validation
 │
 ├── tools/
@@ -238,7 +251,7 @@ There are two separate layers of automated checking, because they check differen
 ## Roadmap
 
 - [ ] Multi-city / multi-leg trips
-- [x] Cross-trip user preference memory (each account's most recent `Trip.constraints_json` is used as a hint for the next trip)
+- [x] Cross-trip personalization via RAG (embeds each trip's free-text description with `gemini-embedding-001`; a new trip retrieves this account's own past trips by cosine similarity — see `core/embeddings.py` / `core/retrieval.py` — rather than just reusing the most recent trip)
 - [ ] Booking integration, not just search
 - [ ] Mobile-friendly layout pass
 
