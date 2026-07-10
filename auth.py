@@ -13,7 +13,12 @@ from bcrypt import hashpw, checkpw, gensalt
 # CONFIG
 # ============================================================
 
-SECRET_KEY = os.getenv("JWT_SECRET_KEY", "travelmind-secret-key-change-in-production-2024")
+SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+if not SECRET_KEY:
+    raise RuntimeError(
+        "JWT_SECRET_KEY environment variable is not set. "
+        "Add it to your .env file (see .env.example)."
+    )
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
 
