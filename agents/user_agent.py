@@ -9,8 +9,8 @@ CONSTRAINTS_SCHEMA = {
         },
         "walking_preference": {
             "type": "string",
-            "enum": ["low", "medium", "high", "flexible"],
-            "description": "How much walking the traveler wants. Use 'flexible' if they say they have no preference or are open to either.",
+            "enum": ["low", "medium", "high", "flexible", "unspecified"],
+            "description": "How much walking the traveler wants. Use 'flexible' ONLY if they explicitly say they have no preference or are open to either. Use 'unspecified' if walking wasn't mentioned at all — do not guess.",
         },
         "food_preference": {
             "type": "string",
@@ -18,8 +18,8 @@ CONSTRAINTS_SCHEMA = {
         },
         "pace": {
             "type": "string",
-            "enum": ["slow", "medium", "fast", "flexible"],
-            "description": "How packed the itinerary should be. Use 'flexible' if the traveler says they don't mind either way.",
+            "enum": ["slow", "medium", "fast", "flexible", "unspecified"],
+            "description": "How packed the itinerary should be. Use 'flexible' ONLY if the traveler explicitly says they don't mind either way. Use 'unspecified' if pace wasn't mentioned at all — do not guess.",
         },
         "travel_with_elderly": {"type": "boolean"},
         "interests": {
