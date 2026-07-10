@@ -206,7 +206,9 @@ class ManagerAgent:
         # --------------------------------------------------
         logger.info("Optimizing route with Google Maps...")
         places_needed = min(max(days * 3, 6), 20)
-        attractions = self.attractions_tool.get_attractions(destination, limit=places_needed)
+        attractions = self.attractions_tool.get_attractions(
+            destination, limit=places_needed, interests=constraints.get("interests")
+        )
         hotel_name  = hotel.get("name", destination)
         start_point = f"{hotel_name}, {destination}"
 
