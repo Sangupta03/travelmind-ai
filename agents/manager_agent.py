@@ -9,7 +9,6 @@ This is the difference between a toy system and a real one.
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta
-import json
 import logging
 import time
 
@@ -90,21 +89,7 @@ class ManagerAgent:
         #    before agents can start)
         # --------------------------------------------------
         logger.info("Extracting user constraints...")
-        constraints_raw = self.user_agent.extract_constraints(user_input, username)
-
-        if isinstance(constraints_raw, str):
-            cleaned = constraints_raw.strip()
-            if cleaned.startswith("```"):
-                cleaned = cleaned.strip("`")
-                if cleaned.lower().startswith("json"):
-                    cleaned = cleaned[4:]
-                cleaned = cleaned.strip()
-            try:
-                constraints = json.loads(cleaned)
-            except Exception:
-                constraints = {"raw": constraints_raw}
-        else:
-            constraints = constraints_raw
+        constraints = self.user_agent.extract_constraints(user_input, username)
 
         # Quick-toggle checkboxes are deterministic — they override
         # whatever (or nothing) the LLM inferred from free text.
