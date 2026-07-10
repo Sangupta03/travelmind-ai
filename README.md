@@ -165,19 +165,15 @@ pip install -r requirements.txt
 
 ### 3 · Configure API keys
 
-Create a `.env` file in the project root:
+Copy `.env.example` to `.env` and fill in your own values:
 
-```env
-GEMINI_API_KEY=your_gemini_key
-GOOGLE_MAPS_KEY=your_google_maps_key
-AMADEUS_API_KEY=your_amadeus_key
-AMADEUS_API_SECRET=your_amadeus_secret
-SERPAPI_KEY=your_serpapi_key
-AVIATIONSTACK_KEY=your_aviationstack_key
+```bash
+cp .env.example .env
 ```
 
 | Key | Required for | If missing |
 |---|---|---|
+| `JWT_SECRET_KEY` | Signing login sessions | App refuses to start — generate one with `python -c "import secrets; print(secrets.token_hex(32))"` |
 | `GEMINI_API_KEY` | Constraint extraction & plan reasoning | App won't function — this is core |
 | `GOOGLE_MAPS_KEY` | Attractions, routing, distances | No itinerary/transport data |
 | `AMADEUS_API_KEY` / `_SECRET` | Live flight pricing, city → airport lookup | Falls back to AviationStack/mock flights and 3-letter-guess airport codes |
@@ -193,6 +189,22 @@ uvicorn server:app --reload
 ```
 
 Visit **http://127.0.0.1:8000** → sign up → plan your first trip.
+
+---
+
+## Testing & evaluation
+
+There are two separate layers of automated checking, because they check different things:
+
+- **Unit tests** (`tests/`) — verify our own deterministic code (route optimization, budget math, transport decisions) using mocked API responses. Fast, free, and run automatically in CI on every push:
+  ```bash
+  pip install -r requirements-dev.txt
+  pytest tests/
+  ```
+- **Eval harness** (`evals/`) — checks whether the *Gemini model itself* correctly extracts structured constraints from realistic free-text trip descriptions (see `evals/cases.py`). This calls the real API, so it's run manually, not in CI:
+  ```bash
+  python evals/run_evals.py
+  ```
 
 ---
 
