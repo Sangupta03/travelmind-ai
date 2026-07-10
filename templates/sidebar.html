@@ -1,26 +1,35 @@
-<aside class="sidebar">
+<aside class="sidebar" id="appSidebar">
+  <script>
+    if (localStorage.getItem('sidebarCollapsed') === 'true') {
+      document.getElementById('appSidebar').classList.add('collapsed');
+    }
+  </script>
+
   <div class="sidebar-top">
     <a href="/dashboard" class="sidebar-brand">
       <div class="sidebar-brand-mark"><i data-lucide="compass"></i></div>
       <span class="sidebar-brand-name">TravelMind</span>
     </a>
+    <button class="sidebar-collapse-btn" id="sidebarCollapseBtn" title="Collapse sidebar">
+      <i data-lucide="panel-left"></i>
+    </button>
   </div>
 
   <nav class="sidebar-nav">
     <div class="sidebar-section-label">Menu</div>
-    <a href="/dashboard" class="s-link {{ 'active' if active_page == 'dashboard' else '' }}">
-      <span class="s-icon"><i data-lucide="layout-dashboard"></i></span> Home
+    <a href="/dashboard" class="s-link {{ 'active' if active_page == 'dashboard' else '' }}" title="Home">
+      <span class="s-icon"><i data-lucide="layout-dashboard"></i></span> <span class="s-text">Home</span>
     </a>
-    <a href="/create" class="s-link {{ 'active' if active_page == 'create' else '' }}">
-      <span class="s-icon"><i data-lucide="plus"></i></span> New Trip
+    <a href="/create" class="s-link {{ 'active' if active_page == 'create' else '' }}" title="New Trip">
+      <span class="s-icon"><i data-lucide="plus"></i></span> <span class="s-text">New Trip</span>
     </a>
-    <a href="/trips" class="s-link {{ 'active' if active_page == 'trips' else '' }}">
-      <span class="s-icon"><i data-lucide="folder"></i></span> Saved Trips
+    <a href="/trips" class="s-link {{ 'active' if active_page == 'trips' else '' }}" title="Saved Trips">
+      <span class="s-icon"><i data-lucide="folder"></i></span> <span class="s-text">Saved Trips</span>
     </a>
 
     <div class="sidebar-section-label">Account</div>
-    <a href="/profile" class="s-link {{ 'active' if active_page == 'profile' else '' }}">
-      <span class="s-icon"><i data-lucide="user"></i></span> Profile
+    <a href="/profile" class="s-link {{ 'active' if active_page == 'profile' else '' }}" title="Profile">
+      <span class="s-icon"><i data-lucide="user"></i></span> <span class="s-text">Profile</span>
     </a>
   </nav>
 
@@ -33,7 +42,7 @@
       </div>
     </div>
     <form action="/logout" method="GET">
-      <button type="submit" class="sidebar-logout"><i data-lucide="log-out"></i> Sign Out</button>
+      <button type="submit" class="sidebar-logout" title="Sign Out"><i data-lucide="log-out"></i> <span class="s-text">Sign Out</span></button>
     </form>
   </div>
 </aside>
@@ -42,5 +51,15 @@
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     if (window.lucide) lucide.createIcons();
+
+    const sidebar = document.getElementById('appSidebar');
+    const collapseBtn = document.getElementById('sidebarCollapseBtn');
+    collapseBtn.title = sidebar.classList.contains('collapsed') ? 'Expand sidebar' : 'Collapse sidebar';
+
+    collapseBtn.addEventListener('click', () => {
+      const collapsed = sidebar.classList.toggle('collapsed');
+      localStorage.setItem('sidebarCollapsed', collapsed);
+      collapseBtn.title = collapsed ? 'Expand sidebar' : 'Collapse sidebar';
+    });
   });
 </script>
