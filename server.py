@@ -291,10 +291,22 @@ def create_plan(
         except ValueError:
             selected_hotel = None
 
+    # Use the constraints from this account's most recent trip (if any) as
+    # a hint for the LLM, so preferences carry over across trips without a
+    # separate memory store — Trip rows are already the source of truth.
+    last_trip = (
+        db.query(Trip)
+        .filter(Trip.user_id == int(user["sub"]))
+        .order_by(Trip.created_at.desc())
+        .first()
+    )
+    previous_constraints = last_trip.constraints if last_trip else None
+
     # Run the full agent pipeline
     result = agent.build_travel_plan(
-        name, needs, destination, days, departure_date or None,
-        origin.strip() or "Delhi", toggles, selected_hotel
+        needs, destination, days, departure_date or None,
+        origin.strip() or "Delhi", toggles, selected_hotel,
+        previous_constraints=previous_constraints,
     )
 
     # Persist to SQLite

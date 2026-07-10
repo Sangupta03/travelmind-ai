@@ -55,7 +55,7 @@ def run():
     failed = 0
 
     for case in CASES:
-        result = agent.extract_constraints(case["input"], username="__eval_harness__")
+        result = agent.extract_constraints(case["input"])
 
         mismatches = []
         for field, expected in case["expect"].items():

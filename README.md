@@ -124,8 +124,7 @@ travelmind-ai/
 │   ├── transport_engine.py     # Walk vs. cab decision logic
 │   ├── walking_estimator.py
 │   ├── constraints.py          # Budget ceiling engine
-│   ├── validator.py            # Constraint validation
-│   └── memory.py               # Per-user profile persistence
+│   └── validator.py            # Constraint validation
 │
 ├── tools/
 │   ├── flight_tool.py          # Amadeus / AviationStack / mock flight search
@@ -239,7 +238,7 @@ There are two separate layers of automated checking, because they check differen
 ## Roadmap
 
 - [ ] Multi-city / multi-leg trips
-- [ ] Cross-trip user preference memory (`core/memory.py` lays the groundwork)
+- [x] Cross-trip user preference memory (each account's most recent `Trip.constraints_json` is used as a hint for the next trip)
 - [ ] Booking integration, not just search
 - [ ] Mobile-friendly layout pass
 

@@ -1,5 +1,4 @@
 from core.llm import call_llm_json
-from core.memory import get_user_profile, update_user_profile
 
 CONSTRAINTS_SCHEMA = {
     "type": "object",
@@ -37,14 +36,13 @@ CONSTRAINTS_SCHEMA = {
 
 
 class UserAgent:
-    def extract_constraints(self, user_input: str, username: str) -> dict:
-        profile = get_user_profile(username)
-
+    def extract_constraints(self, user_input: str, previous_constraints: dict = None) -> dict:
         prompt = f"""
         You are an AI that extracts structured travel constraints.
 
-        Past user profile:
-        {profile}
+        Constraints from the traveler's previous trip, if any (use only as
+        a hint — the new input below always takes priority):
+        {previous_constraints or "None"}
 
         New user input:
         {user_input}
@@ -60,8 +58,6 @@ class UserAgent:
                 "travel_with_elderly": False,
                 "interests": [],
             }
-
-        update_user_profile(username, {"last_constraints": constraints})
 
         return constraints
 
