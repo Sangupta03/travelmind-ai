@@ -147,8 +147,8 @@ button { font-family: inherit; }
   padding: 2px 6px; border-radius: 4px;
 }
 .nav-links { display: flex; align-items: center; gap: 1.5rem; }
-.nav-links a { font-size: 0.88rem; color: var(--gray-600); font-weight: 500; transition: color 0.15s; }
-.nav-links a:hover { color: var(--navy); }
+.nav-links a:not(.btn) { font-size: 0.88rem; color: var(--gray-600); font-weight: 500; transition: color 0.15s; }
+.nav-links a:not(.btn):hover { color: var(--navy); }
 
 /* HERO */
 .hero {
