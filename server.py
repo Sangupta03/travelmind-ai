@@ -338,34 +338,65 @@ def create_plan(
 
 # ── RESULT ────────────────────────────────────────────────────
 
+def _trip_context(trip: Trip) -> dict:
+    """Fields shared by the dashboard result view and the printable view."""
+    return {
+        "trip_id":        trip.id,
+        "destination":    trip.destination,
+        "days_count":     trip.days_count,
+        "hotel":          trip.hotel,
+        "preferences":    format_preferences(trip.constraints),
+        "cost":           trip.estimated_cost,
+        "cost_breakdown": trip.cost_breakdown,
+        "daily_plan":     trip.daily_plan,
+        "attractions":    trip.attractions,
+        "transport":      trip.transport,
+        "ai_reasoning_html": render_ai_reasoning(trip.ai_reasoning),
+        "day_dates":      trip.day_dates,
+        "flights":        trip.flights,
+    }
+
+
+def _get_owned_trip(db: Session, user: dict, trip_id: int):
+    trip = db.query(Trip).filter(Trip.id == trip_id).first()
+    if not trip or trip.user_id != int(user["sub"]):
+        return None
+    return trip
+
+
 @app.get("/result/{trip_id}", response_class=HTMLResponse)
 def result_page(request: Request, trip_id: int, db: Session = Depends(get_db)):
     user = get_current_user(request)
     if not user:
         return RedirectResponse("/login", 302)
 
-    trip = db.query(Trip).filter(Trip.id == trip_id).first()
-    if not trip or trip.user_id != int(user["sub"]):
+    trip = _get_owned_trip(db, user, trip_id)
+    if not trip:
         return RedirectResponse("/dashboard", 302)
 
     return templates.TemplateResponse(
         "result.html",
         base_ctx(request, user, {
-            "active_page":    "trips",
-            "destination":    trip.destination,
-            "days_count":     trip.days_count,
-            "hotel":          trip.hotel,
-            "preferences":    format_preferences(trip.constraints),
-            "cost":           trip.estimated_cost,
-            "cost_breakdown": trip.cost_breakdown,
-            "daily_plan":     trip.daily_plan,
-            "attractions":    trip.attractions,
-            "transport":      trip.transport,
-            "ai_reasoning_html": render_ai_reasoning(trip.ai_reasoning),
-            "insights":       build_insights(trip),
-            "day_dates":      trip.day_dates,
-            "flights":        trip.flights,
+            "active_page": "trips",
+            "insights":    build_insights(trip),
+            **_trip_context(trip),
         })
+    )
+
+
+@app.get("/result/{trip_id}/print", response_class=HTMLResponse)
+def result_print_page(request: Request, trip_id: int, db: Session = Depends(get_db)):
+    user = get_current_user(request)
+    if not user:
+        return RedirectResponse("/login", 302)
+
+    trip = _get_owned_trip(db, user, trip_id)
+    if not trip:
+        return RedirectResponse("/dashboard", 302)
+
+    return templates.TemplateResponse(
+        "result_print.html",
+        {"request": request, **_trip_context(trip)}
     )
 
 

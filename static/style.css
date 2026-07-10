@@ -642,7 +642,14 @@ svg.lucide { width: 1em; height: 1em; stroke-width: 2; vertical-align: middle; }
 .trip-breadcrumb a { color: rgba(255,255,255,0.55); transition: color 0.15s; }
 .trip-breadcrumb a:hover { color: rgba(255,255,255,0.85); }
 .trip-hero-title { font-family: 'Playfair Display', serif; font-size: 2.2rem; color: white; font-weight: 700; margin-bottom: 0.8rem; }
-.trip-hero-meta { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-bottom: 1.5rem; }
+.trip-hero-meta { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-bottom: 1.2rem; }
+.trip-hero-print-btn {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  background: rgba(255,255,255,0.12); border: 1.5px solid rgba(255,255,255,0.35);
+  color: white; padding: 0.55rem 1.1rem; border-radius: var(--radius-sm);
+  font-size: 0.85rem; font-weight: 600; margin-bottom: 1.5rem; transition: background 0.15s;
+}
+.trip-hero-print-btn:hover { background: rgba(255,255,255,0.22); }
 .trip-hero-pill {
   display: inline-flex; align-items: center; gap: 0.3rem;
   background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2);
@@ -948,6 +955,61 @@ svg.lucide { width: 1em; height: 1em; stroke-width: 2; vertical-align: middle; }
   .summary-strip { grid-template-columns: repeat(2, 1fr); }
   .profile-layout { grid-template-columns: 1fr; }
   .saved-trips-grid { grid-template-columns: 1fr; }
+}
+
+/* ══════════════════════════════════════════════════════════
+   PRINTABLE ITINERARY
+══════════════════════════════════════════════════════════ */
+.print-body { background: var(--gray-100); }
+
+.print-toolbar {
+  position: sticky; top: 0; z-index: 10; background: white;
+  border-bottom: 1px solid var(--gray-200);
+  padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center;
+}
+
+.print-page {
+  max-width: 780px; margin: 0 auto; background: white;
+  padding: 2.5rem 3rem 3rem; color: var(--gray-800);
+}
+
+.print-header { border-bottom: 2px solid var(--navy); padding-bottom: 1rem; margin-bottom: 1.5rem; }
+.print-brand { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.06em; color: var(--blue); text-transform: uppercase; }
+.print-header h1 { font-size: 1.8rem; color: var(--navy); margin: 0.3rem 0 0.5rem; }
+.print-meta { font-size: 0.85rem; color: var(--gray-500); display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
+.print-section { margin-bottom: 1.8rem; }
+.print-section h2 {
+  font-size: 1.05rem; color: var(--navy); margin-bottom: 0.8rem;
+  border-bottom: 1px solid var(--gray-200); padding-bottom: 0.4rem;
+}
+
+.print-pref-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem 1.5rem; font-size: 0.85rem; }
+.print-pref-item { display: flex; justify-content: space-between; border-bottom: 1px dotted var(--gray-200); padding: 0.25rem 0; }
+.print-pref-item span { color: var(--gray-500); }
+.print-pref-item strong { color: var(--navy); }
+
+.print-day { margin-bottom: 1.3rem; break-inside: avoid; }
+.print-day-heading { font-weight: 700; color: var(--navy); font-size: 0.95rem; margin-bottom: 0.5rem; }
+
+.print-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; margin-bottom: 0.5rem; }
+.print-table th {
+  text-align: left; background: var(--gray-100); color: var(--gray-600);
+  font-weight: 600; padding: 0.4rem 0.6rem; border-bottom: 1px solid var(--gray-200);
+}
+.print-table td { padding: 0.4rem 0.6rem; border-bottom: 1px solid var(--gray-100); }
+.print-total-row td { font-weight: 700; color: var(--navy); border-top: 1px solid var(--gray-300); }
+
+.print-transport { font-size: 0.78rem; color: var(--gray-600); }
+.print-leg { white-space: nowrap; }
+
+.print-footer { text-align: center; font-size: 0.75rem; color: var(--gray-400); margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--gray-200); }
+
+@media print {
+  .no-print { display: none !important; }
+  .print-body { background: white; }
+  .print-page { max-width: none; padding: 0; }
+  .print-day { page-break-inside: avoid; }
 }
 
 .pref-note { font-size:0.85rem; color:var(--gray-400); font-style:italic; padding:0.5rem 0; }

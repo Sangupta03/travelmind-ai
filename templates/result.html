@@ -27,6 +27,9 @@
           <span class="trip-hero-pill cost"><i data-lucide="wallet"></i> ₹{{ "{:,.0f}".format(cost) if cost else 'N/A' }}</span>
           <span class="trip-hero-pill"><i data-lucide="map-pin"></i> {{ attractions | length }} Attractions</span>
         </div>
+        <a href="/result/{{ trip_id }}/print" target="_blank" class="trip-hero-print-btn">
+          <i data-lucide="printer"></i> Download / Print Itinerary
+        </a>
       </div>
     </div>
 
