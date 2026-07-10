@@ -20,10 +20,22 @@ if SQLALCHEMY_DATABASE_URL.startswith("postgres://"):
 
 _is_sqlite = SQLALCHEMY_DATABASE_URL.startswith("sqlite")
 
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL,
-    connect_args={"check_same_thread": False} if _is_sqlite else {}
-)
+if _is_sqlite:
+    engine = create_engine(
+        SQLALCHEMY_DATABASE_URL,
+        connect_args={"check_same_thread": False}
+    )
+else:
+    # pool_pre_ping tests each connection before use and transparently
+    # reconnects if it's dead — cloud Postgres providers (Render's free
+    # tier included) silently close connections that sit idle for a few
+    # minutes, which otherwise surfaces as a 500 on the first request
+    # after any period of inactivity.
+    engine = create_engine(
+        SQLALCHEMY_DATABASE_URL,
+        pool_pre_ping=True,
+        pool_recycle=280,
+    )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
