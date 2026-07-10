@@ -259,6 +259,18 @@ def select_hotel_page(
 
 # ── PLAN ─────────────────────────────────────────────────────
 
+@app.get("/plan")
+def plan_get_redirect():
+    """
+    /plan only accepts POST (it's a form submission target). If someone
+    reloads the browser while the AI pipeline is still running, the
+    resulting GET would otherwise hit FastAPI's raw 405 JSON error —
+    redirect to /trips instead, since the in-flight request may well
+    have finished and saved a trip in the meantime.
+    """
+    return RedirectResponse("/trips", 302)
+
+
 @app.post("/plan", response_class=HTMLResponse)
 def create_plan(
     request: Request,

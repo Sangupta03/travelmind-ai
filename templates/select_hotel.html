@@ -59,8 +59,12 @@
 
           <button type="submit" class="btn btn-primary btn-full btn-lg" id="submitBtn" style="margin-top:1.5rem">
             <span id="btnText">Generate AI Plan <i data-lucide="arrow-right"></i></span>
-            <span id="btnLoader" style="display:none"><i data-lucide="loader-2" class="spin"></i> Agents working...</span>
+            <span id="btnLoader" style="display:none"><i data-lucide="loader-2" class="spin"></i> <span id="btnLoaderText">Agents working...</span></span>
           </button>
+          <p id="waitNote" style="display:none;font-size:0.78rem;color:var(--gray-400);margin-top:0.6rem;text-align:center">
+            <i data-lucide="lightbulb" style="width:0.9em"></i>
+            This can take up to a minute — 5 AI agents run one after another. Please don't refresh or close this tab.
+          </p>
         </div>
       </form>
     </div>
@@ -81,6 +85,18 @@
     btn.disabled = true;
     document.getElementById('btnText').style.display = 'none';
     document.getElementById('btnLoader').style.display = 'inline';
+    document.getElementById('waitNote').style.display = 'block';
+
+    const loaderText = document.getElementById('btnLoaderText');
+    const stages = [
+      [0,  'Agents working...'],
+      [15, 'Still working — merging agent plans...'],
+      [30, 'Almost there — optimizing your route...'],
+      [45, 'Finishing up...'],
+    ];
+    stages.forEach(([seconds, text]) => {
+      setTimeout(() => { loaderText.textContent = text; }, seconds * 1000);
+    });
   });
 
   document.addEventListener('DOMContentLoaded', () => {
