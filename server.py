@@ -6,6 +6,10 @@ Run: uvicorn server:app --reload
 
 import json
 import logging
+
+from dotenv import load_dotenv
+load_dotenv()
+
 from fastapi import FastAPI, Form, Request, Depends
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
@@ -218,7 +222,6 @@ def create_page(request: Request):
 @app.post("/select-hotel", response_class=HTMLResponse)
 def select_hotel_page(
     request: Request,
-    name: str            = Form(...),
     needs: str            = Form(default=""),
     destination: str      = Form(...),
     days: int             = Form(...),
@@ -244,7 +247,7 @@ def select_hotel_page(
             "days":        days,
             "hotels":      hotels,
             "trip_fields": {
-                "name": name, "needs": needs, "destination": destination, "days": days,
+                "needs": needs, "destination": destination, "days": days,
                 "departure_date": departure_date, "origin": origin,
                 "low_walking": low_walking, "budget_strict": budget_strict,
                 "elderly": elderly, "vegetarian": vegetarian, "family": family,
@@ -258,7 +261,6 @@ def select_hotel_page(
 @app.post("/plan", response_class=HTMLResponse)
 def create_plan(
     request: Request,
-    name: str            = Form(...),
     needs: str            = Form(default=""),
     destination: str      = Form(...),
     days: int             = Form(...),
