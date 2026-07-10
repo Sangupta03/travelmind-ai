@@ -6,7 +6,11 @@ used for flight pricing). Falls back to a 3-letter guess if the lookup
 fails or Amadeus isn't configured, so callers never have to handle errors.
 """
 
+import logging
+
 import requests
+
+logger = logging.getLogger(__name__)
 
 _CACHE = {}
 
@@ -61,7 +65,7 @@ def resolve_iata(place: str) -> str:
             _CACHE[key] = code
             return code
     except Exception as e:
-        print(f"Airport lookup failed for '{place}': {e}")
+        logger.warning("Airport lookup failed for '%s': %s", place, e)
 
     _CACHE[key] = fallback
     return fallback

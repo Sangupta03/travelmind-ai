@@ -10,9 +10,12 @@ Price strategy:
     flagged via "data_source".
 """
 
+import logging
 import random
 import requests
 from config import AVIATIONSTACK_KEY, AMADEUS_API_KEY, AMADEUS_API_SECRET
+
+logger = logging.getLogger(__name__)
 
 MOCK_AIRLINES = ["IndiGo", "Vistara", "Air India", "Akasa Air"]
 MOCK_DURATIONS = ["1h 00m", "1h 05m", "1h 10m", "1h 20m"]
@@ -36,7 +39,7 @@ class FlightSearch:
                 if flights:
                     return flights
             except Exception as e:
-                print(f"Amadeus search failed ({e}), falling back.")
+                logger.warning("Amadeus search failed (%s), falling back.", e)
 
         if AVIATIONSTACK_KEY:
             try:
@@ -44,7 +47,7 @@ class FlightSearch:
                 if flights:
                     return flights
             except Exception as e:
-                print(f"Aviationstack failed: {e}")
+                logger.warning("Aviationstack failed: %s", e)
 
         return self._mock_flights(route_label)
 

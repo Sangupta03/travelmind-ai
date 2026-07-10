@@ -1,5 +1,9 @@
+import logging
+
 import requests
 from config import GOOGLE_MAPS_KEY
+
+logger = logging.getLogger(__name__)
 
 class MapsTool:
     def geocode(self, place):
@@ -8,7 +12,7 @@ class MapsTool:
         try:
             r = requests.get(url, params=params, timeout=15).json()
         except requests.exceptions.RequestException as e:
-            print(f"Geocode request failed for '{place}': {e}")
+            logger.warning("Geocode request failed for '%s': %s", place, e)
             return None
         if not r.get("results"):
             return None
@@ -30,7 +34,7 @@ class MapsTool:
         try:
             return requests.get(url, params=params, timeout=15).json()
         except requests.exceptions.RequestException as e:
-            print(f"Distance Matrix request failed ({origin} -> {destinations}): {e}")
+            logger.warning("Distance Matrix request failed (%s -> %s): %s", origin, destinations, e)
             return {}
 
     def directions(self, origin, destination, mode="driving"):
@@ -44,7 +48,7 @@ class MapsTool:
         try:
             return requests.get(url, params=params, timeout=15).json()
         except requests.exceptions.RequestException as e:
-            print(f"Directions request failed ({origin} -> {destination}): {e}")
+            logger.warning("Directions request failed (%s -> %s): %s", origin, destination, e)
             return {}
 
     def nearby_places(self, location, keyword="tourist attraction", radius=5000):
@@ -59,5 +63,5 @@ class MapsTool:
         try:
             return requests.get(url, params=params, timeout=15).json()
         except requests.exceptions.RequestException as e:
-            print(f"Nearby places request failed for '{location}': {e}")
+            logger.warning("Nearby places request failed for '%s': %s", location, e)
             return {}

@@ -10,7 +10,10 @@ This is the difference between a toy system and a real one.
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta
 import json
+import logging
 import time
+
+logger = logging.getLogger(__name__)
 
 from agents.user_agent import UserAgent
 from agents.budget_agent import BudgetAgent
@@ -59,21 +62,21 @@ class ManagerAgent:
     # =========================================================
 
     def _run_budget(self, destination, days, constraints, departure_date=None, origin="Delhi", selected_hotel=None):
-        print("  [parallel] BudgetAgent starting...")
+        logger.info("[parallel] BudgetAgent starting...")
         result = self.budget_agent.create_plan(destination, days, constraints, departure_date, origin, selected_hotel)
-        print("  [parallel] BudgetAgent done.")
+        logger.info("[parallel] BudgetAgent done.")
         return result
 
     def _run_comfort(self, destination, days, constraints):
-        print("  [parallel] ComfortAgent starting...")
+        logger.info("[parallel] ComfortAgent starting...")
         result = self.comfort_agent.create_plan(destination, days, constraints)
-        print("  [parallel] ComfortAgent done.")
+        logger.info("[parallel] ComfortAgent done.")
         return result
 
     def _run_experience(self, destination, days, constraints):
-        print("  [parallel] ExperienceAgent starting...")
+        logger.info("[parallel] ExperienceAgent starting...")
         result = self.experience_agent.create_plan(destination, days, constraints)
-        print("  [parallel] ExperienceAgent done.")
+        logger.info("[parallel] ExperienceAgent done.")
         return result
 
     # =========================================================
@@ -86,7 +89,7 @@ class ManagerAgent:
         # 1. Extract user constraints (sequential — needed
         #    before agents can start)
         # --------------------------------------------------
-        print("\nExtracting user constraints...")
+        logger.info("Extracting user constraints...")
         constraints_raw = self.user_agent.extract_constraints(user_input, username)
 
         if isinstance(constraints_raw, str):
@@ -122,7 +125,7 @@ class ManagerAgent:
         #    This is the core improvement over the old version.
         #    All three LLM calls happen simultaneously.
         # --------------------------------------------------
-        print("\nLaunching Budget, Comfort, Experience agents in parallel...")
+        logger.info("Launching Budget, Comfort, Experience agents in parallel...")
         t_start = time.time()
 
         budget_result  = None
@@ -151,9 +154,9 @@ class ManagerAgent:
                         comfort_plan = result
                     elif name == "ExperienceAgent":
                         experience_plan = result
-                    print(f"  {name} completed.")
+                    logger.info("%s completed.", name)
                 except Exception as exc:
-                    print(f"  {name} failed: {exc}")
+                    logger.error("%s failed: %s", name, exc)
                     # Provide safe fallbacks so the pipeline continues
                     if name == "BudgetAgent":
                         budget_result = {"plan": "Budget plan unavailable.", "hotel": {"name": destination}}
@@ -163,7 +166,7 @@ class ManagerAgent:
                         experience_plan = "Experience plan unavailable."
 
         elapsed = round(time.time() - t_start, 1)
-        print(f"\nAll 3 agents finished in {elapsed}s (parallel)")
+        logger.info("All 3 agents finished in %ss (parallel)", elapsed)
 
         # Extract from budget result
         budget_plan = budget_result.get("plan", "") if budget_result else ""
@@ -174,7 +177,7 @@ class ManagerAgent:
         # 3. Negotiator merges the three plans (sequential —
         #    depends on all three outputs above)
         # --------------------------------------------------
-        print("\nNegotiatorAgent merging plans...")
+        logger.info("NegotiatorAgent merging plans...")
         final_plan = self.negotiator_agent.negotiate(
             budget_plan,
             comfort_plan,
@@ -216,7 +219,7 @@ class ManagerAgent:
         # --------------------------------------------------
         # 5. Maps intelligence
         # --------------------------------------------------
-        print("\nOptimizing route with Google Maps...")
+        logger.info("Optimizing route with Google Maps...")
         places_needed = min(max(days * 3, 6), 20)
         attractions = self.attractions_tool.get_attractions(destination, limit=places_needed)
         hotel_name  = hotel.get("name", destination)
@@ -229,7 +232,7 @@ class ManagerAgent:
         # --------------------------------------------------
         # 6. Daily time engine
         # --------------------------------------------------
-        print("\nBuilding daily schedule...")
+        logger.info("Building daily schedule...")
         daily_plan = self.daily_time_engine.build_daily_plan(
             start_point=start_point,
             places=ordered_places,
@@ -241,7 +244,7 @@ class ManagerAgent:
         # 7. Transport decisions (walk vs cab per leg)
         #    Each day starts and ends at the hotel.
         # --------------------------------------------------
-        print("\nGenerating transport links...")
+        logger.info("Generating transport links...")
         transport_rows = []
 
         for day_index, day_places in enumerate(daily_plan, start=1):

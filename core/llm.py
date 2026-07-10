@@ -1,6 +1,9 @@
+import logging
 import time
 from google.genai import Client
 from config import GEMINI_API_KEY
+
+logger = logging.getLogger(__name__)
 
 client = Client(api_key=GEMINI_API_KEY)
 MODEL_NAME = "gemini-2.5-flash"
@@ -17,7 +20,7 @@ def call_llm(prompt: str, retries=3):
         except Exception as e:
             if "RESOURCE_EXHAUSTED" in str(e):
                 wait_time = 45
-                print(f"\n⚠️ Gemini quota hit. Waiting {wait_time} seconds before retrying...")
+                logger.warning("Gemini quota hit. Waiting %s seconds before retrying...", wait_time)
                 time.sleep(wait_time)
             else:
                 raise e

@@ -5,6 +5,7 @@ Run: uvicorn server:app --reload
 """
 
 import json
+import logging
 from fastapi import FastAPI, Form, Request, Depends
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
@@ -17,6 +18,12 @@ from agents.manager_agent import ManagerAgent
 from core.constraints import DEFAULT_MAX_BUDGET
 from tools.hotel_tool import HotelSearch
 
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+)
+logger = logging.getLogger(__name__)
+
 app = FastAPI(title="TravelMind AI")
 agent = ManagerAgent()
 
@@ -27,7 +34,7 @@ templates = Jinja2Templates(directory="templates")
 @app.on_event("startup")
 def startup():
     init_db()
-    print("Database ready: travelmind.db")
+    logger.info("Database ready: travelmind.db")
 
 
 # ── HELPERS ───────────────────────────────────────────────────
