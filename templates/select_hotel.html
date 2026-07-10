@@ -63,7 +63,7 @@
           </button>
           <p id="waitNote" style="display:none;font-size:0.78rem;color:var(--gray-400);margin-top:0.6rem;text-align:center">
             <i data-lucide="lightbulb" style="width:0.9em"></i>
-            This can take up to a minute — 5 AI agents run one after another. Please don't refresh or close this tab.
+            This can take up to a minute — 3 AI agents (Budget, Comfort, Experience) work in parallel, then a Negotiator merges their plans. Please don't refresh or close this tab.
           </p>
         </div>
       </form>
@@ -89,10 +89,10 @@
 
     const loaderText = document.getElementById('btnLoaderText');
     const stages = [
-      [0,  'Agents working...'],
-      [15, 'Still working — merging agent plans...'],
-      [30, 'Almost there — optimizing your route...'],
-      [45, 'Finishing up...'],
+      [0,  'Agents working in parallel...'],
+      [20, 'Merging agent plans...'],
+      [35, 'Optimizing your route...'],
+      [50, 'Finishing up...'],
     ];
     stages.forEach(([seconds, text]) => {
       setTimeout(() => { loaderText.textContent = text; }, seconds * 1000);
