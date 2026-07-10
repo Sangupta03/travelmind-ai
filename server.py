@@ -20,6 +20,7 @@ from database import init_db, get_db, User, Trip
 from auth import hash_password, verify_password, create_access_token, get_current_user
 from agents.manager_agent import ManagerAgent
 from core.constraints import DEFAULT_MAX_BUDGET
+from core.preferences import format_preferences
 from tools.hotel_tool import HotelSearch
 
 logging.basicConfig(
@@ -79,9 +80,8 @@ def build_insights(trip) -> list:
     budget_pct = round((trip.estimated_cost / DEFAULT_MAX_BUDGET) * 100) if trip.estimated_cost else 0
 
     applied_constraints = [
-        f"{k.replace('_', ' ').title()}: {v}"
-        for k, v in constraints.items()
-        if k != "raw" and str(v).lower() not in ("none", "null", "false", "", "[]", "{}")
+        f"{label}: {value}"
+        for label, value in format_preferences(constraints).items()
     ]
 
     return [
@@ -354,7 +354,7 @@ def result_page(request: Request, trip_id: int, db: Session = Depends(get_db)):
             "destination":    trip.destination,
             "days_count":     trip.days_count,
             "hotel":          trip.hotel,
-            "constraints":    trip.constraints,
+            "preferences":    format_preferences(trip.constraints),
             "cost":           trip.estimated_cost,
             "cost_breakdown": trip.cost_breakdown,
             "daily_plan":     trip.daily_plan,

@@ -97,23 +97,15 @@
 
         <div class="ov-card">
           <h3>Your Preferences</h3>
-          {% if constraints and constraints is mapping %}
-            {% set ns = namespace(found=false) %}
-            {% for k, v in constraints.items() %}
-              {% set vs = v | string | lower %}
-              {% if vs not in ['none','null','false','','[]','{}'] and k != 'raw' %}
-                {% set ns.found = true %}
-                <div class="ov-row">
-                  <span>{{ k | replace('_', ' ') | title }}</span>
-                  <strong>{{ v }}</strong>
-                </div>
-              {% endif %}
+          {% if preferences %}
+            {% for label, value in preferences.items() %}
+              <div class="ov-row">
+                <span>{{ label }}</span>
+                <strong>{{ value }}</strong>
+              </div>
             {% endfor %}
-            {% if not ns.found %}
-              <p class="pref-note">Try adding specific preferences like budget, vegetarian, low walking next time.</p>
-            {% endif %}
           {% else %}
-            <p class="pref-note">No specific constraints applied.</p>
+            <p class="pref-note">Try adding specific preferences like budget, vegetarian, low walking next time.</p>
           {% endif %}
         </div>
 
