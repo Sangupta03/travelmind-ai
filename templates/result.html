@@ -325,7 +325,11 @@
         <span><i data-lucide="chevron-down"></i></span>
       </button>
       <div class="reasoning-raw" id="reasoningRaw">
-        <div id="reasoningContent"></div>
+        {% if ai_reasoning_html %}
+        <div class="reasoning-content">{{ ai_reasoning_html | safe }}</div>
+        {% else %}
+        <p style="color:var(--gray-400)">No AI reasoning available.</p>
+        {% endif %}
       </div>
     </div>
 
@@ -352,38 +356,6 @@
     btn.querySelector('span:first-child').textContent = isOpen ? 'Show Full AI Reasoning' : 'Hide Full AI Reasoning';
     const icon = btn.querySelector('span:last-child i');
     if (icon) icon.style.transform = isOpen ? '' : 'rotate(180deg)';
-  }
-
-  // Markdown renderer for AI reasoning
-  function renderMarkdown(text) {
-    if (!text) return '<p style="color:var(--gray-400)">No AI reasoning available.</p>';
-    return text
-      // Headers
-      .replace(/^### (.+)$/gm, '<h4 style="color:var(--navy);font-size:0.95rem;font-weight:700;margin:1.2rem 0 0.4rem">$1</h4>')
-      .replace(/^## (.+)$/gm,  '<h3 style="color:var(--navy);font-size:1.05rem;font-weight:700;margin:1.5rem 0 0.5rem">$1</h3>')
-      .replace(/^# (.+)$/gm,   '<h2 style="color:var(--navy);font-size:1.2rem;font-weight:700;margin:1.5rem 0 0.5rem">$1</h2>')
-      // Bold
-      .replace(/\*\*(.+?)\*\*/g, '<strong style="color:var(--navy)">$1</strong>')
-      // Italic
-      .replace(/\*(.+?)\*/g, '<em>$1</em>')
-      // Bullet points
-      .replace(/^\* (.+)$/gm, '<li style="margin:0.3rem 0;padding-left:0.3rem">$1</li>')
-      .replace(/^- (.+)$/gm,  '<li style="margin:0.3rem 0;padding-left:0.3rem">$1</li>')
-      // Wrap consecutive <li> in <ul>
-      .replace(/((<li[^>]*>.*?<\/li>\n?)+)/gs, '<ul style="padding-left:1.2rem;margin:0.4rem 0">$1</ul>')
-      // Horizontal rules
-      .replace(/^---$/gm, '<hr style="border:none;border-top:1px solid var(--gray-200);margin:1rem 0"/>')
-      // Paragraphs — wrap non-tagged lines
-      .replace(/^(?!<[hul]|<li|<hr)(.+)$/gm, '<p style="margin:0.4rem 0;line-height:1.7;color:var(--gray-700)">$1</p>')
-      // Clean up empty lines
-      .replace(/\n{3,}/g, '\n\n');
-  }
-
-  // Render AI reasoning on page load
-  const rawReasoning = {{ ai_reasoning | tojson }};
-  const reasoningEl = document.getElementById('reasoningContent');
-  if (reasoningEl && rawReasoning) {
-    reasoningEl.innerHTML = renderMarkdown(rawReasoning);
   }
 
   // Donut chart

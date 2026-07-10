@@ -21,6 +21,7 @@ from auth import hash_password, verify_password, create_access_token, get_curren
 from agents.manager_agent import ManagerAgent
 from core.constraints import DEFAULT_MAX_BUDGET
 from core.preferences import format_preferences
+from core.markdown_render import render_ai_reasoning
 from tools.hotel_tool import HotelSearch
 
 logging.basicConfig(
@@ -360,7 +361,7 @@ def result_page(request: Request, trip_id: int, db: Session = Depends(get_db)):
             "daily_plan":     trip.daily_plan,
             "attractions":    trip.attractions,
             "transport":      trip.transport,
-            "ai_reasoning":   trip.ai_reasoning,
+            "ai_reasoning_html": render_ai_reasoning(trip.ai_reasoning),
             "insights":       build_insights(trip),
             "day_dates":      trip.day_dates,
             "flights":        trip.flights,

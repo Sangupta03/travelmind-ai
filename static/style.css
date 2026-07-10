@@ -829,6 +829,21 @@ svg.lucide { width: 1em; height: 1em; stroke-width: 2; vertical-align: middle; }
 }
 .reasoning-raw pre { font-size: 0.78rem; color: var(--gray-700); line-height: 1.7; white-space: pre-wrap; font-family: 'Courier New', monospace; }
 
+.reasoning-content { font-size: 0.85rem; color: var(--gray-700); line-height: 1.7; }
+.reasoning-content h1, .reasoning-content h2, .reasoning-content h3, .reasoning-content h4 {
+  color: var(--navy); font-weight: 700; margin: 1.4rem 0 0.5rem;
+}
+.reasoning-content h1 { font-size: 1.2rem; }
+.reasoning-content h2 { font-size: 1.1rem; }
+.reasoning-content h3 { font-size: 1.02rem; }
+.reasoning-content h4 { font-size: 0.95rem; }
+.reasoning-content p { margin: 0.5rem 0; }
+.reasoning-content strong { color: var(--navy); }
+.reasoning-content ul, .reasoning-content ol { padding-left: 1.3rem; margin: 0.5rem 0; }
+.reasoning-content li { margin: 0.3rem 0; }
+.reasoning-content li > ul, .reasoning-content li > ol { margin: 0.3rem 0; }
+.reasoning-content hr { border: none; border-top: 1px solid var(--gray-200); margin: 1.2rem 0; }
+
 /* ══════════════════════════════════════════════════════════
    SAVED TRIPS PAGE
 ══════════════════════════════════════════════════════════ */
