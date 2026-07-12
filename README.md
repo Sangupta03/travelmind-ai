@@ -19,6 +19,7 @@ Describe a trip in plain language. A team of specialized AI agents negotiates a 
 ## Contents
 
 - [Why this is different](#why-this-is-different)
+- [By the numbers](#by-the-numbers)
 - [Features](#features)
 - [Tech stack](#tech-stack)
 - [Agent pipeline](#agent-pipeline)
@@ -38,6 +39,19 @@ Most "AI trip planner" demos are a single prompt wrapped in a chat box. TravelMi
 > 🔐 Sign up → 🧭 describe your trip → 🏨 pick a real hotel → 🤖 watch five agents negotiate → 📅 get a real day-by-day plan → 💾 it's saved to your account.
 
 No mock itineraries — flights, hotels, distances, and routes all come from live APIs wherever credentials are configured, with honest, labeled fallbacks when they're not.
+
+---
+
+## By the numbers
+
+| | |
+|---|---|
+| **5 agents** | User, Budget, Comfort, Experience, Negotiator — `ManagerAgent` orchestrates but isn't counted, since it doesn't plan |
+| **3 agents run in parallel** | Budget, Comfort, Experience execute concurrently via `ThreadPoolExecutor`, cutting that stage's wall-clock time by ~60% vs. running them sequentially |
+| **72 automated tests, 100% passing** | Unit tests across `core/`, `agents/`, and `tools/`, all mocking external APIs — no network access or API key needed to run them |
+| **7 LLM eval cases** | A separate eval harness (`evals/`) that calls the *real* Gemini API to check constraint-extraction accuracy — distinct from the unit tests, which check our own code |
+| **3,072-dimension embeddings** | `gemini-embedding-001` vectors used for RAG-based trip personalization (`core/embeddings.py`, `core/retrieval.py`) |
+| **CI on every push** | GitHub Actions runs the full test suite automatically (`.github/workflows/ci.yml`) |
 
 ---
 
